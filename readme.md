@@ -41,5 +41,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 - Tailwind CSS
 - Authentication with Clerk
-- Serverless DB with PlanetScale
-- Cath all route --> `sign-up/[[...sign-up]]` and `sign-in/[[...sign-in]]`
+- Neon as PostgreSQL database
+- Prisma as ORM
+- Catch all route --> `sign-up/[[...sign-up]]` and `sign-in/[[...sign-in]]`
