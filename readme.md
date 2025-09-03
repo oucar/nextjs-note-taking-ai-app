@@ -6,7 +6,7 @@ A simple journaling app scaffold using Next.js (App Router) with Clerk authentic
 
 - App: Next.js (App Router), React, TypeScript
   - Config: `next.config.ts`, `tsconfig.json`
-- Auth: Clerk
+- Auth: Clerk https://dashboard.clerk.com/
   - Provider in `app/layout.tsx`
   - Route protection via `middleware.ts` (public routes: `/`, `/sign-in(.*)`, `/sign-up(.*)`)
   - Auth pages: `app/sign-in/[[...sign-in]]/page.tsx`, `app/sign-up/[[...sign-up]]/page.tsx`, `app/new-user/page.tsx`
@@ -51,6 +51,12 @@ npx prisma generate
 npx prisma migrate dev --name init
 ```
 
+Note: After you change `prisma/schema.prisma`, run the following to update the database and regenerate Prisma Client:
+
+```bash
+npx prisma db push
+```
+
 4. Run the development server
 
 ```bash
@@ -64,3 +70,4 @@ Open http://localhost:3000
 - Build `/journal` pages and CRUD APIs
 - Link Clerk users to Prisma `User` on sign-up/sign-in
 - UI for creating entries and displaying analysis
+- Add loading animations

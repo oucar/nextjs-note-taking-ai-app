@@ -36,7 +36,6 @@ model JournalEntry {
   @@index([userId])
 }
 
-// AI Analysis of the JournalEntry (to determine the mood)
 model Analysis {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
