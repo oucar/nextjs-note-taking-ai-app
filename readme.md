@@ -1,46 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Journal App (Next.js + Clerk + Prisma + Neon)
+
+A simple journaling app scaffold using Next.js (App Router) with Clerk authentication, Prisma ORM, and a Neon Postgres database. Tailwind CSS powers the styling.
+
+## Stack
+
+- App: Next.js (App Router), React, TypeScript
+  - Config: `next.config.ts`, `tsconfig.json`
+- Auth: Clerk
+  - Provider in `app/layout.tsx`
+  - Route protection via `middleware.ts` (public routes: `/`, `/sign-in(.*)`, `/sign-up(.*)`)
+  - Auth pages: `app/sign-in/[[...sign-in]]/page.tsx`, `app/sign-up/[[...sign-up]]/page.tsx`, `app/new-user/page.tsx`
+- Data: Prisma + Neon Postgres
+  - Env vars in `.env` / `.env.local` (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `DATABASE_URL`, `DIRECT_URL`)
+  - Schema in `prisma/schema.prisma` with models: `User`, `JournalEntry`, `Analysis`
+- Styling: Tailwind CSS with PostCSS (`postcss.config.mjs`, global styles in `app/globals.css`)
+- Linting: ESLint (`eslint.config.mjs`)
+
+## Implemented
+
+- Home page with CTA to `/journal`: `app/page.tsx`
+- Clerk sign-in and sign-up flows with catch-all routes
+- Route protection using Clerk middleware
+- Prisma schema (users, journal entries, analysis)
+
+## Prisma schema at a glance
+
+- `User` — links to Clerk user (`clerkId`, `email`)
+- `JournalEntry` — belongs to a user; stores `content`
+- `Analysis` — one-to-one with `JournalEntry` (mood, summary, color, negative)
+
+See `prisma/schema.prisma` for details.
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Set environment variables
+
+- Copy or edit `.env.local` with your Clerk keys and Neon Postgres URLs.
+- Required keys: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `DATABASE_URL`, `DIRECT_URL`.
+
+3. Set up the database (Prisma)
+
+```bash
+npx prisma generate
+npx prisma migrate dev --name init
+```
+
+4. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Next steps
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
----
-
-## Notes for later
-
-- Tailwind CSS
-- Authentication with Clerk
-- Neon as PostgreSQL database
-- Prisma as ORM
-- Catch all route --> `sign-up/[[...sign-up]]` and `sign-in/[[...sign-in]]`
+- Build `/journal` pages and CRUD APIs
+- Link Clerk users to Prisma `User` on sign-up/sign-in
+- UI for creating entries and displaying analysis
