@@ -63,6 +63,12 @@ npx prisma db push
 npm run dev
 ```
 
+5. Inspect db
+
+```bash
+npx prisma studio
+```
+
 Open http://localhost:3000
 
 ## Next steps
