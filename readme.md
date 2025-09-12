@@ -77,3 +77,11 @@ Open http://localhost:3000
 - Link Clerk users to Prisma `User` on sign-up/sign-in
 - UI for creating entries and displaying analysis
 - Add loading animations
+
+##
+
+LLM - Large Language Model
+Transformers:
+[LangChain.js: Basically ](https://js.langchain.com/docs/introduction/)
+
+- Maybe write a Neural Network in js
