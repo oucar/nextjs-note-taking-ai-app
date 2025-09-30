@@ -1,10 +1,13 @@
 import { prisma } from '@/util/db';
-import { currentUser } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
 const createNewUser = async () => {
   const user = await currentUser();
-  console.log(user);
+  if (!user) {
+    // If there's no Clerk user (shouldn't happen on this route), send back to home.
+    redirect('/');
+  }
 
   const match = await prisma.user.findUnique({
     where: {
@@ -13,10 +16,14 @@ const createNewUser = async () => {
   });
 
   if (!match) {
+    // Ensure we provide a non-null email if your schema requires it. If email
+    // can be null in your Prisma schema, prefer 'email: null' instead.
+    const email = user?.emailAddresses?.[0]?.emailAddress ?? '';
+
     await prisma.user.create({
       data: {
         clerkId: user.id,
-        email: user?.emailAddresses[0].emailAddress,
+        email,
       },
     });
   }

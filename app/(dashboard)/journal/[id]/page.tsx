@@ -1,9 +1,15 @@
 import Editor from '@/components/Editor';
 import { getUserFromClerkID } from '@/util/auth';
+import { redirect } from 'next/navigation';
 import { prisma } from '@/util/db';
 
 const getEntry = async (id) => {
-  const user = await getUserFromClerkID();
+  let user;
+  try {
+    user = await getUserFromClerkID();
+  } catch {
+    redirect('/new-user');
+  }
   const entry = await prisma.journalEntry.findUnique({
     where: {
       userId_id: {
