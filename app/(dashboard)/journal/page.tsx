@@ -1,9 +1,8 @@
 import EntryCard from '@/components/EntryCard';
 import NewEntry from '@/components/NewEntry';
 import Question from '@/components/Question';
-import { qa } from '@/utils/ai';
 import { getUserFromClerkID } from '@/util/auth';
-import { prisma } from '@/utils/db';
+import { prisma } from '@/util/db';
 import Link from 'next/link';
 
 const getEntries = async () => {

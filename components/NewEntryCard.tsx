@@ -1,6 +1,6 @@
 'use client';
 
-import { createNewEntry } from '@/utils/api';
+import { createNewEntry } from '@/util/api';
 import { useRouter } from 'next/navigation';
 
 const NewEntryCard = () => {

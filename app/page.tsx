@@ -1,9 +1,9 @@
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
 
 export default async function Home() {
-  const user = await currentUser();
-  const href = user ? '/journal' : '/new-user';
+  const { userId } = await auth();
+  const href = userId ? '/journal' : '/new-user';
 
   return (
     <div className='w-screen h-screen bg-black flex justify-center items-center text-white'>
