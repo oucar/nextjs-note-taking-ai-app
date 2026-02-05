@@ -16,15 +16,12 @@ const createNewUser = async () => {
   });
 
   if (!match) {
-    // Ensure we provide a non-null email if your schema requires it. If email
-    // can be null in your Prisma schema, prefer 'email: null' instead.
     const email = user?.emailAddresses?.[0]?.emailAddress ?? '';
 
-    await prisma.user.create({
-      data: {
-        clerkId: user.id,
-        email,
-      },
+    await prisma.user.upsert({
+      where: { email },
+      update: { clerkId: user.id },
+      create: { clerkId: user.id, email },
     });
   }
 
