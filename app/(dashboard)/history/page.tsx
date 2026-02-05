@@ -26,7 +26,7 @@ const JournalEditorPage = async ({ params }: any) => {
     // No specific entry requested — render a simple placeholder or redirect as desired.
     return (
       <div className='w-full h-full flex items-center justify-center'>
-        <p className='text-lg text-black/40'>No entry selected.</p>
+        <p className='text-lg text-muted-foreground'>No entry selected.</p>
       </div>
     );
   }
@@ -34,7 +34,7 @@ const JournalEditorPage = async ({ params }: any) => {
   const entry = await getEntry(id);
 
   return (
-    <div className='w-full h-full'>
+    <div className='h-full'>
       <Editor entry={entry} />
     </div>
   );
