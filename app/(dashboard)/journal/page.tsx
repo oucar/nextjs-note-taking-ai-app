@@ -33,19 +33,20 @@ const getEntries = async () => {
 const JournalPage = async () => {
   const data = await getEntries();
   return (
-    <div className='px-6 py-8 bg-zinc-100/50 h-full'>
-      <h1 className='text-4xl mb-12'>Journals</h1>
-      <div className='my-8'>
-        <Question />
+    <div className='flex-1 space-y-8 p-6 md:p-8'>
+      <div>
+        <h1 className='text-3xl font-bold tracking-tight'>Journals</h1>
+        <p className='text-muted-foreground'>
+          Your journal entries and reflections.
+        </p>
       </div>
-      <div className='grid grid-cols-3 gap-4'>
+      <Question />
+      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         <NewEntry />
         {data.map((entry) => (
-          <div key={entry.id}>
-            <Link href={`/journal/${entry.id}`}>
-              <EntryCard entry={entry} />
-            </Link>
-          </div>
+          <Link key={entry.id} href={`/journal/${entry.id}`}>
+            <EntryCard entry={entry} />
+          </Link>
         ))}
       </div>
     </div>

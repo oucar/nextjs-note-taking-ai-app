@@ -46,11 +46,11 @@ export const updateEntry = async (id, updates) => {
   }
 };
 
-export const askQuestion = async (question) => {
+export const askQuestion = async (question, history: Array<{ role: string; content: string }> = []) => {
   const res = await fetch(
     new Request(createURL(`/api/question`), {
       method: 'POST',
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, history }),
     })
   );
 

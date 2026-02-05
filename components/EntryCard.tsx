@@ -1,4 +1,11 @@
 import { scoreToColor } from '@/util/color';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 type EntryCardProps = {
   entry: {
@@ -21,25 +28,27 @@ const EntryCard = ({ entry }: EntryCardProps) => {
     score !== null ? scoreToColor(score) : entry.analysis?.color ?? '#d4d4d4';
 
   return (
-    <div className='overflow-hidden rounded-lg bg-white shadow hover:shadow-md transition-shadow'>
+    <Card className='overflow-hidden py-0 gap-0 transition-shadow hover:shadow-md'>
       <div className='h-2' style={{ background: color }} />
-      <div className='px-4 py-3 sm:px-6 flex items-center justify-between'>
-        <span className='text-sm text-gray-500'>{date}</span>
+      <CardHeader className='flex flex-row items-center justify-between py-3'>
+        <span className='text-sm text-muted-foreground'>{date}</span>
         {score !== null && (
-          <span
-            className='text-xs font-bold px-2 py-0.5 rounded-full text-white'
+          <Badge
+            className='text-white border-0'
             style={{ background: color }}
           >
             {score > 0 ? '+' : ''}
             {score}
-          </span>
+          </Badge>
         )}
-      </div>
-      <div className='px-4 py-3 sm:px-6 text-sm text-gray-700'>{summary}</div>
-      <div className='px-4 py-3 sm:px-6 text-xs font-medium uppercase tracking-wide text-gray-400'>
-        {mood}
-      </div>
-    </div>
+      </CardHeader>
+      <CardContent className='pb-3 text-sm'>{summary}</CardContent>
+      <CardFooter className='pb-4'>
+        <span className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+          {mood}
+        </span>
+      </CardFooter>
+    </Card>
   );
 };
 

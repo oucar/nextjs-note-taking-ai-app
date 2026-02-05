@@ -1,5 +1,7 @@
 import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 const links = [
   { name: 'Journals', href: '/journal' },
@@ -8,30 +10,30 @@ const links = [
 
 const DashboardLayout = ({ children }) => {
   return (
-    <div className='w-screen h-screen relative'>
-      <aside className='absolute left-0 top-0 h-full w-[200px] border-r border-black/10'>
-        <div className='px-4 my-4'>
-          <span className='text-3xl'>MOOD</span>
+    <div className='flex h-screen w-screen'>
+      <aside className='flex w-56 flex-col border-r bg-muted/40'>
+        <div className='flex h-14 items-center px-4'>
+          <span className='text-xl font-bold tracking-tight'>MOOD</span>
         </div>
-        <div>
-          <ul className='px-4'>
-            {links.map((link) => (
-              <li key={link.name} className='text-xl my-4'>
-                <Link href={link.href}>{link.name}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <Separator />
+        <nav className='flex flex-col gap-1 p-4'>
+          {links.map((link) => (
+            <Button
+              key={link.name}
+              variant='ghost'
+              className='justify-start'
+              asChild
+            >
+              <Link href={link.href}>{link.name}</Link>
+            </Button>
+          ))}
+        </nav>
       </aside>
-      <div className='ml-[200px] h-full w-[calc(100vw-200px)]'>
-        <header className='h-[60px] border-b border-black/10'>
-          <nav className='px-4 h-full'>
-            <div className='flex items-center justify-end h-full'>
-              <UserButton afterSignOutUrl='/' />
-            </div>
-          </nav>
+      <div className='flex flex-1 flex-col'>
+        <header className='flex h-14 items-center justify-end border-b px-6'>
+          <UserButton afterSignOutUrl='/' />
         </header>
-        <div className='h-[calc(100vh-60px)]'>{children}</div>
+        <main className='flex-1 overflow-auto'>{children}</main>
       </div>
     </div>
   );

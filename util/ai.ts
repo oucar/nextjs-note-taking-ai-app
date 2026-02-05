@@ -1,8 +1,12 @@
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
+import {
+  SystemMessage,
+  HumanMessage,
+  AIMessage,
+} from '@langchain/core/messages';
 import { Document } from '@langchain/core/documents';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { loadQARefineChain } from 'langchain/chains';
 import z from 'zod';
 import { scoreToColor } from '@/util/color';
 
@@ -14,9 +18,7 @@ const analysisSchema = z.object({
     ),
   subject: z
     .string()
-    .describe(
-      'The main topic or subject of the journal entry in a few words.'
-    ),
+    .describe('The main topic or subject of the journal entry in a few words.'),
   negative: z
     .boolean()
     .describe(
@@ -64,26 +66,67 @@ export const analyzeEntry = async (entry: { content: string }) => {
 
 export const qa = async (
   question: string,
-  entries: Array<{ id: string; content: string; createdAt: Date | string }>
+  entries: Array<{
+    id: string;
+    content: string;
+    createdAt: Date | string;
+    analysis?: {
+      mood: string;
+      subject: string;
+      summary: string;
+      negative: boolean;
+      sentimentScore: number;
+    } | null;
+  }>,
+  history: Array<{ role: 'human' | 'ai'; content: string }> = []
 ) => {
-  const docs = entries.map(
-    (entry) =>
-      new Document({
-        pageContent: entry.content,
-        metadata: { source: entry.id, date: entry.createdAt },
-      })
-  );
+  const docs = entries.map((entry) => {
+    const dateStr =
+      entry.createdAt instanceof Date
+        ? entry.createdAt.toISOString().split('T')[0]
+        : new Date(entry.createdAt).toISOString().split('T')[0];
+
+    let enrichedContent = `[Date: ${dateStr}]\n`;
+
+    if (entry.analysis) {
+      enrichedContent += `[Mood: ${entry.analysis.mood}]\n`;
+      enrichedContent += `[Subject: ${entry.analysis.subject}]\n`;
+      enrichedContent += `[Summary: ${entry.analysis.summary}]\n`;
+      enrichedContent += `[Sentiment: ${entry.analysis.sentimentScore}/10]\n`;
+      enrichedContent += `[Negative: ${entry.analysis.negative}]\n`;
+    }
+
+    enrichedContent += `\n${entry.content}`;
+
+    return new Document({
+      pageContent: enrichedContent,
+      metadata: { source: entry.id, date: dateStr },
+    });
+  });
 
   const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
   const embeddings = new OpenAIEmbeddings();
   const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
-  const relevantDocs = await store.similaritySearch(question);
+  const relevantDocs = await store.similaritySearch(question, 4);
 
-  const chain = loadQARefineChain(llm);
-  const res = await chain.call({
-    input_documents: relevantDocs,
-    question,
-  });
+  const context = relevantDocs.map((doc) => doc.pageContent).join('\n\n---\n\n');
 
-  return res.output_text as string;
+  const messages = [
+    new SystemMessage(
+      `You are a helpful, friendly assistant that answers questions about the user's journal entries. ` +
+        `You have access to their journal entries below. Answer questions naturally and conversationally — ` +
+        `be concise, warm, and direct. If a journal entry mentions something the user asks about, reference ` +
+        `the date and details from that entry. Never say you don't have information if it's present in the entries below.\n\n` +
+        `JOURNAL ENTRIES:\n${context}`
+    ),
+    ...history.map((msg) =>
+      msg.role === 'human'
+        ? new HumanMessage(msg.content)
+        : new AIMessage(msg.content)
+    ),
+    new HumanMessage(question),
+  ];
+
+  const res = await llm.invoke(messages);
+  return res.content as string;
 };

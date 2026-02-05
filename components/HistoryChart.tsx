@@ -9,6 +9,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { scoreToColor } from '@/util/color';
+import { Card, CardContent } from '@/components/ui/card';
 
 const CustomTooltip = ({ payload, label, active }) => {
   if (!active || !payload?.length) return null;
@@ -25,27 +26,40 @@ const CustomTooltip = ({ payload, label, active }) => {
   });
 
   return (
-    <div className='p-4 bg-white shadow-md border border-black/10 rounded-lg relative'>
-      <div
-        className='absolute left-2 top-2 w-2 h-2 rounded-full'
-        style={{ background: color }}
-      />
-      <p className='text-sm text-black/30 ml-4'>{dateLabel}</p>
-      <p className='text-xl uppercase font-semibold' style={{ color }}>
-        {analysis.mood}
-      </p>
-      <p className='text-sm text-black/50'>
-        Score: {analysis.sentimentScore > 0 ? '+' : ''}
-        {analysis.sentimentScore}
-      </p>
-    </div>
+    <Card className='shadow-lg py-0'>
+      <CardContent className='p-3'>
+        <div className='flex items-center gap-2'>
+          <div
+            className='h-2 w-2 rounded-full'
+            style={{ background: color }}
+          />
+          <p className='text-xs text-muted-foreground'>{dateLabel}</p>
+        </div>
+        <p className='text-lg font-semibold uppercase' style={{ color }}>
+          {analysis.mood}
+        </p>
+        <p className='text-xs text-muted-foreground'>
+          Score: {analysis.sentimentScore > 0 ? '+' : ''}
+          {analysis.sentimentScore}
+        </p>
+      </CardContent>
+    </Card>
   );
 };
 
 const CustomDot = (props) => {
   const { cx, cy, payload } = props;
   const color = scoreToColor(payload.sentimentScore);
-  return <circle cx={cx} cy={cy} r={5} fill={color} stroke='white' strokeWidth={2} />;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill={color}
+      stroke='white'
+      strokeWidth={2}
+    />
+  );
 };
 
 const HistoryChart = ({ data }) => {

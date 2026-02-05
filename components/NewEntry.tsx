@@ -2,6 +2,8 @@
 
 import { newEntry } from '@/util/api';
 import { useRouter } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/card';
+import { PlusCircle } from 'lucide-react';
 
 const NewEntry = () => {
   const router = useRouter();
@@ -12,14 +14,17 @@ const NewEntry = () => {
   };
 
   return (
-    <div
-      className='cursor-pointer overflow-hidden rounded-lg bg-white shadow'
+    <Card
+      className='cursor-pointer items-center justify-center transition-colors hover:bg-muted/50'
       onClick={handleOnClick}
     >
-      <div className='px-4 py-5 sm:p-6'>
-        <span className='text-3xl'>New Entry</span>
-      </div>
-    </div>
+      <CardContent className='flex flex-col items-center gap-2'>
+        <PlusCircle className='h-8 w-8 text-muted-foreground' />
+        <span className='text-lg font-medium text-muted-foreground'>
+          New Entry
+        </span>
+      </CardContent>
+    </Card>
   );
 };
 
