@@ -1,18 +1,35 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { RetroWindow } from '@/components/retro';
 
 const HomeLoading = () => {
   return (
-    <div className='p-8 lg:p-12 max-w-7xl mx-auto space-y-10'>
-      <div className='space-y-3'>
-        <Skeleton className='h-10 w-56' />
-        <Skeleton className='h-6 w-80' />
+    <div className='space-y-6'>
+      {/* Page Header Skeleton */}
+      <div className='space-y-1'>
+        <div className='h-8 w-32 bg-foreground/10 animate-pulse' />
+        <div className='h-4 w-48 bg-foreground/5 animate-pulse' />
       </div>
-      <Skeleton className='h-32 w-full rounded-xl' />
-      <div className='grid gap-6 sm:grid-cols-2 xl:grid-cols-3'>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className='h-[180px] w-full rounded-xl' />
-        ))}
-      </div>
+
+      {/* Action Bar Skeleton */}
+      <RetroWindow title='Actions'>
+        <div className='flex flex-col sm:flex-row gap-4 sm:items-end sm:justify-between'>
+          <div className='flex-1 max-w-xl h-10 bg-foreground/5 animate-pulse' />
+          <div className='h-10 w-32 bg-foreground/10 animate-pulse' />
+        </div>
+      </RetroWindow>
+
+      {/* Entries Skeleton */}
+      <RetroWindow title='Loading...'>
+        <div className='space-y-3'>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className='flex items-center gap-4 py-3'>
+              <div className='w-20 h-4 bg-foreground/5 animate-pulse' />
+              <div className='flex-1 h-4 bg-foreground/5 animate-pulse' />
+              <div className='w-16 h-5 bg-foreground/5 animate-pulse' />
+              <div className='w-8 h-4 bg-foreground/5 animate-pulse' />
+            </div>
+          ))}
+        </div>
+      </RetroWindow>
     </div>
   );
 };

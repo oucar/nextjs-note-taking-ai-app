@@ -28,11 +28,7 @@ const getEntry = async (id) => {
 const JournalEditorPage = async ({ params }) => {
   const entry = await getEntry(params.id);
 
-  return (
-    <div className='h-full'>
-      <Editor entry={entry} />
-    </div>
-  );
+  return <Editor entry={entry} />;
 };
 
 export default JournalEditorPage;

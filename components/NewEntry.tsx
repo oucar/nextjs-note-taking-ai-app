@@ -2,7 +2,7 @@
 
 import { newEntry } from '@/util/api';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
+import { RetroButton } from '@/components/retro';
 import { PlusCircle } from 'lucide-react';
 
 const NewEntry = () => {
@@ -14,17 +14,10 @@ const NewEntry = () => {
   };
 
   return (
-    <Card
-      className='cursor-pointer items-center justify-center transition-colors hover:bg-muted/50'
-      onClick={handleOnClick}
-    >
-      <CardContent className='flex flex-col items-center gap-2'>
-        <PlusCircle className='h-8 w-8 text-muted-foreground' />
-        <span className='text-lg font-medium text-muted-foreground'>
-          New Entry
-        </span>
-      </CardContent>
-    </Card>
+    <RetroButton onClick={handleOnClick} className='gap-2'>
+      <PlusCircle className='h-4 w-4' />
+      New Entry
+    </RetroButton>
   );
 };
 

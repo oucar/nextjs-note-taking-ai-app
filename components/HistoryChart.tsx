@@ -9,7 +9,6 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { scoreToColor } from '@/util/color';
-import { Card, CardContent } from '@/components/ui/card';
 
 const CustomTooltip = ({ payload, label, active }) => {
   if (!active || !payload?.length) return null;
@@ -26,24 +25,19 @@ const CustomTooltip = ({ payload, label, active }) => {
   });
 
   return (
-    <Card className='shadow-lg py-0'>
-      <CardContent className='p-3'>
-        <div className='flex items-center gap-2'>
-          <div
-            className='h-2 w-2 rounded-full'
-            style={{ background: color }}
-          />
-          <p className='text-xs text-muted-foreground'>{dateLabel}</p>
-        </div>
-        <p className='text-lg font-semibold uppercase' style={{ color }}>
-          {analysis.mood}
-        </p>
-        <p className='text-xs text-muted-foreground'>
-          Score: {analysis.sentimentScore > 0 ? '+' : ''}
-          {analysis.sentimentScore}
-        </p>
-      </CardContent>
-    </Card>
+    <div className='bg-card border-2 border-foreground/20 shadow-[2px_2px_0_rgba(0,0,0,0.15)] p-3'>
+      <div className='flex items-center gap-2'>
+        <div className='h-2 w-2' style={{ background: color }} />
+        <p className='text-xs text-muted-foreground font-mono'>{dateLabel}</p>
+      </div>
+      <p className='text-lg font-black uppercase' style={{ color }}>
+        {analysis.mood}
+      </p>
+      <p className='text-xs text-muted-foreground font-mono'>
+        Score: {analysis.sentimentScore > 0 ? '+' : ''}
+        {analysis.sentimentScore}
+      </p>
+    </div>
   );
 };
 
@@ -51,13 +45,14 @@ const CustomDot = (props) => {
   const { cx, cy, payload } = props;
   const color = scoreToColor(payload.sentimentScore);
   return (
-    <circle
-      cx={cx}
-      cy={cy}
-      r={5}
+    <rect
+      x={cx - 4}
+      y={cy - 4}
+      width={8}
+      height={8}
       fill={color}
-      stroke='white'
-      strokeWidth={2}
+      stroke='var(--foreground)'
+      strokeWidth={1.5}
     />
   );
 };
@@ -69,14 +64,18 @@ const HistoryChart = ({ data }) => {
         <Line
           type='monotone'
           dataKey='sentimentScore'
-          stroke='#8884d8'
+          stroke='var(--primary)'
           strokeWidth={2}
           dot={<CustomDot />}
-          activeDot={{ r: 8 }}
+          activeDot={{ r: 8, fill: 'var(--primary)' }}
         />
-        <XAxis dataKey='updatedAt' />
+        <XAxis
+          dataKey='updatedAt'
+          tick={{ fontSize: 10, fontFamily: 'monospace' }}
+          stroke='var(--muted-foreground)'
+        />
         <YAxis domain={[-10, 10]} hide />
-        <ReferenceLine y={0} stroke='#d4d4d4' strokeDasharray='3 3' />
+        <ReferenceLine y={0} stroke='var(--border)' strokeDasharray='3 3' />
         <Tooltip content={<CustomTooltip />} />
       </LineChart>
     </ResponsiveContainer>

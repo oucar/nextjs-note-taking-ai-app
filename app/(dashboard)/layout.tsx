@@ -1,54 +1,56 @@
 import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { BookOpen, History } from 'lucide-react';
 
 const links = [
-  { name: 'Journals', href: '/journal', icon: BookOpen },
-  { name: 'History', href: '/history', icon: History },
+  { name: 'Journals', href: '/journal' },
+  { name: 'History', href: '/history' },
 ];
 
 const DashboardLayout = ({ children }) => {
   return (
-    <div className='flex h-screen overflow-hidden bg-background'>
-      <aside className='flex w-64 flex-col border-r bg-card shrink-0'>
-        <div className='flex h-16 items-center px-6'>
-          <span className='text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent'>
-            MOOD
-          </span>
-        </div>
-        <Separator />
-        <nav className='flex flex-col gap-1 p-4'>
-          {links.map((link) => (
-            <Button
-              key={link.name}
-              variant='ghost'
-              className='justify-start gap-3 h-11'
-              asChild
-            >
-              <Link href={link.href}>
-                <link.icon className='h-5 w-5' />
-                {link.name}
+    <div className='min-h-screen retro-bg'>
+      {/* Retro Header Bar */}
+      <header className='sticky top-0 z-50 border-b-2 border-foreground/20 bg-card shadow-[0_2px_0_0_rgba(0,0,0,0.1)]'>
+        <div className='retro-container'>
+          <div className='flex h-14 items-center justify-between'>
+            {/* Left: Logo */}
+            <div className='flex items-center gap-8'>
+              <Link href='/journal' className='no-underline'>
+                <span className='text-xl font-black tracking-tight uppercase'>
+                  <span className='text-primary'>[ </span>
+                  MOOD
+                  <span className='text-primary'> ]</span>
+                </span>
               </Link>
-            </Button>
-          ))}
-        </nav>
-        <div className='mt-auto p-4'>
-          <Separator className='mb-4' />
-          <div className='flex items-center justify-between px-2'>
-            <span className='text-sm text-muted-foreground'>Theme</span>
-            <ThemeToggle />
+
+              {/* Nav Links */}
+              <nav className='hidden sm:flex items-center gap-1'>
+                {links.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className='px-3 py-1.5 text-sm font-bold uppercase tracking-wide text-foreground/80 hover:text-foreground hover:bg-accent border-2 border-transparent hover:border-foreground/10 transition-colors no-underline'
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* Right: Theme Toggle + User */}
+            <div className='flex items-center gap-3'>
+              <ThemeToggle />
+              <div className='border-l-2 border-foreground/10 pl-3'>
+                <UserButton afterSignOutUrl='/' />
+              </div>
+            </div>
           </div>
         </div>
-      </aside>
-      <div className='flex flex-1 flex-col min-w-0'>
-        <header className='flex h-16 items-center justify-end border-b bg-card/50 px-8 shrink-0'>
-          <UserButton afterSignOutUrl='/' />
-        </header>
-        <main className='flex-1 overflow-auto'>{children}</main>
-      </div>
+      </header>
+
+      {/* Main Content */}
+      <main className='retro-container py-6 md:py-8'>{children}</main>
     </div>
   );
 };
