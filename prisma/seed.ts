@@ -267,6 +267,167 @@ const journalTemplates = [
     summary: "Started meditation practice, struggled but remained open to it.",
     sentimentScore: 3,
   },
+  // Additional varied entries for richer seeding
+  {
+    content: "Took a spontaneous day trip to the coast. Walked along the beach with my shoes off and let the cold water numb my toes. The sound of the waves helped clear my head in a way nothing else has lately.",
+    mood: "calm",
+    subject: "day trip to the coast",
+    negative: false,
+    summary: "Spent a spontaneous day at the beach and felt mentally reset.",
+    sentimentScore: 7,
+  },
+  {
+    content: "Worked from a coffee shop today instead of my apartment. The change of scenery and quiet background chatter made me surprisingly productive. Might make this a weekly ritual.",
+    mood: "productive",
+    subject: "working from cafe",
+    negative: false,
+    summary: "Tried working from a coffee shop and noticed a big productivity boost.",
+    sentimentScore: 6,
+  },
+  {
+    content: "Had a long call with my sibling tonight. We ended up reminiscing about childhood memories and laughing at old inside jokes. It reminded me how important it is to stay connected.",
+    mood: "nostalgic",
+    subject: "call with sibling",
+    negative: false,
+    summary: "Caught up with a sibling and bonded over shared memories.",
+    sentimentScore: 8,
+  },
+  {
+    content: "Tried to focus on work but kept getting distracted by every notification on my phone. By the end of the day I felt like I had been busy but accomplished nothing substantial.",
+    mood: "scattered",
+    subject: "digital distractions",
+    negative: true,
+    summary: "Struggled to focus due to constant phone distractions.",
+    sentimentScore: -3,
+  },
+  {
+    content: "Went grocery shopping and actually planned meals for the week. It felt oddly satisfying to stock the fridge with real ingredients instead of takeout boxes.",
+    mood: "organized",
+    subject: "meal planning",
+    negative: false,
+    summary: "Planned weekly meals and stocked up on groceries, feeling more in control.",
+    sentimentScore: 5,
+  },
+  {
+    content: "Traffic was a nightmare on the way home. A 20-minute drive turned into an hour of inching forward. Had to consciously unclench my jaw by the time I parked.",
+    mood: "annoyed",
+    subject: "commute frustration",
+    negative: true,
+    summary: "Felt stressed and irritated after unexpectedly heavy traffic.",
+    sentimentScore: -4,
+  },
+  {
+    content: "Spent the evening reorganizing my workspace. Cleared out a bunch of random cables and papers I no longer need. The desk feels lighter and so does my brain.",
+    mood: "refreshed",
+    subject: "workspace cleanup",
+    negative: false,
+    summary: "Decluttered the desk and created a cleaner workspace.",
+    sentimentScore: 5,
+  },
+  {
+    content: "Tried a new sleep routine: dimming the lights early, reading instead of scrolling, and a cup of herbal tea. Still woke up once in the night, but overall it felt like an improvement.",
+    mood: "cautiously optimistic",
+    subject: "improving sleep habits",
+    negative: false,
+    summary: "Experimented with a gentler bedtime routine and slept slightly better.",
+    sentimentScore: 3,
+  },
+  {
+    content: "Had a tough one-on-one with my manager. Got some feedback that stung, but it was fair. Spent some time writing down concrete steps I can take to improve.",
+    mood: "humbled",
+    subject: "work feedback",
+    negative: true,
+    summary: "Received critical but fair feedback at work and started planning improvements.",
+    sentimentScore: -1,
+  },
+  {
+    content: "Experimented with cooking a completely plant-based dinner. It took longer than expected, but the end result was actually delicious. Might try a full vegetarian week soon.",
+    mood: "encouraged",
+    subject: "plant-based cooking",
+    negative: false,
+    summary: "Cooked a successful plant-based meal and considered eating less meat.",
+    sentimentScore: 6,
+  },
+  {
+    content: "Went for a slow walk around the neighborhood at sunset. Noticed details I usually miss, like the smell of someone baking and a new mural on the corner.",
+    mood: "present",
+    subject: "mindful walk",
+    negative: false,
+    summary: "Took a mindful walk and paid attention to small neighborhood details.",
+    sentimentScore: 5,
+  },
+  {
+    content: "Felt completely drained by midday and ended up doomscrolling instead of tackling my to-do list. I know it doesnt help, but it felt easier than facing everything.",
+    mood: "drained",
+    subject: "procrastination spiral",
+    negative: true,
+    summary: "Avoided responsibilities by scrolling online, leading to more exhaustion.",
+    sentimentScore: -5,
+  },
+  {
+    content: "Started journaling again after months of ignoring it. The first few sentences felt awkward, but eventually the words spilled out. It felt good to be honest on paper.",
+    mood: "relieved",
+    subject: "returning to journaling",
+    negative: false,
+    summary: "Picked journaling back up and felt emotional relief after writing.",
+    sentimentScore: 5,
+  },
+  {
+    content: "Attended a local meetup for people in my industry. It was intimidating at first, but I exchanged a few LinkedIn profiles and left feeling less alone in my career worries.",
+    mood: "connected",
+    subject: "industry meetup",
+    negative: false,
+    summary: "Pushed through social anxiety to network with peers at a meetup.",
+    sentimentScore: 4,
+  },
+  {
+    content: "Finally cleaned out my email inbox. Thousands of unread messages whittled down to just a handful of important threads. Its silly how satisfying that empty inbox icon feels.",
+    mood: "accomplished",
+    subject: "inbox zero",
+    negative: false,
+    summary: "Processed a huge email backlog and reached inbox zero.",
+    sentimentScore: 7,
+  },
+  {
+    content: "Had a small panic when my bank app showed an unfamiliar charge. Turned out to be a subscription I forgot about, but the scare reminded me I need to track my finances better.",
+    mood: "anxious",
+    subject: "money worries",
+    negative: true,
+    summary: "Felt anxious after spotting an unexpected charge, then realized it was a forgotten subscription.",
+    sentimentScore: -3,
+  },
+  {
+    content: "Watched the rain through the window instead of turning on the TV tonight. The sound against the glass was strangely comforting, and I realized how rarely I let things be quiet.",
+    mood: "soothed",
+    subject: "rainy evening",
+    negative: false,
+    summary: "Chose a quiet evening listening to rain over screen time and felt calmer.",
+    sentimentScore: 6,
+  },
+  {
+    content: "Helped a neighbor carry their groceries up the stairs. It was a tiny thing, but their gratitude felt disproportionate to the effort. Nice reminder that small kindnesses matter.",
+    mood: "kind",
+    subject: "helping neighbor",
+    negative: false,
+    summary: "Did a small favor for a neighbor and felt good about the interaction.",
+    sentimentScore: 6,
+  },
+  {
+    content: "Had a migraine come out of nowhere this afternoon. Spent hours in a dark room waiting for it to pass. Frustrating to lose so much time to something I cant control.",
+    mood: "miserable",
+    subject: "migraine day",
+    negative: true,
+    summary: "Day disrupted by a sudden migraine and the need to recover in the dark.",
+    sentimentScore: -6,
+  },
+  {
+    content: "Started a tiny balcony garden with herbs and a couple of tomato plants. No idea if they will survive, but getting my hands in the soil felt grounding.",
+    mood: "hopeful",
+    subject: "balcony gardening",
+    negative: false,
+    summary: "Planted a small container garden and felt hopeful about nurturing something.",
+    sentimentScore: 5,
+  },
 ];
 
 // Function to generate color from sentiment score
@@ -334,7 +495,8 @@ async function main() {
   });
   console.log(`Deleted ${deletedEntries.count} existing entries`);
   
-  // Generate entries for the last 30 days
+  // Generate entries for the last 70 days
+  const DAYS = 70;
   const entries: Array<{
     content: string;
     createdAt: Date;
@@ -347,22 +509,10 @@ async function main() {
   
   const now = new Date();
   
-  for (let daysAgo = 29; daysAgo >= 0; daysAgo--) {
-    // Random number of entries for this day (0-5, weighted towards 1-3)
-    const weights = [0.1, 0.25, 0.3, 0.2, 0.1, 0.05]; // probabilities for 0,1,2,3,4,5 entries
-    const rand = Math.random();
-    let entriesCount = 0;
-    let cumulative = 0;
-    for (let i = 0; i < weights.length; i++) {
-      cumulative += weights[i];
-      if (rand < cumulative) {
-        entriesCount = i;
-        break;
-      }
-    }
-    
-    if (entriesCount === 0) continue;
-    
+  for (let daysAgo = DAYS - 1; daysAgo >= 0; daysAgo--) {
+    // Random number of entries for this day (1-5)
+    const entriesCount = 1 + Math.floor(Math.random() * 5);
+
     const dayEntries = getRandomEntriesForDay(entriesCount);
     
     for (let i = 0; i < dayEntries.length; i++) {
@@ -385,7 +535,7 @@ async function main() {
     }
   }
   
-  console.log(`Creating ${entries.length} journal entries...`);
+  console.log(`Creating ${entries.length} journal entries over the last ${DAYS} days...`);
   
   // Create entries with their analyses
   for (const entry of entries) {
