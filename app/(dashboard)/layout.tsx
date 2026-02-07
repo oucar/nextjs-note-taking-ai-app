@@ -1,6 +1,8 @@
 import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { NavigationProgress } from '@/components/NavigationProgress';
+import { Suspense } from 'react';
 
 const links = [
   { name: 'Journals', href: '/journal' },
@@ -11,6 +13,11 @@ const links = [
 const DashboardLayout = ({ children }) => {
   return (
     <div className='min-h-screen retro-bg'>
+      {/* Navigation Progress Bar */}
+      <Suspense fallback={null}>
+        <NavigationProgress />
+      </Suspense>
+
       {/* Retro Header Bar */}
       <header className='sticky top-0 z-50 border-b-2 border-foreground/20 bg-card shadow-[0_2px_0_0_rgba(0,0,0,0.1)]'>
         <div className='retro-container'>

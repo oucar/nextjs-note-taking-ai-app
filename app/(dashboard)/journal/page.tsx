@@ -79,11 +79,15 @@ const getEntries = async (page: number) => {
       },
     },
   });
-
-  // Also fetch timeline entries (last 60 days, fixed)
   const timelineEntries = await getTimelineEntries(user.id);
 
-  return { data, startDate, endDate, timelineEntries, hasOlderEntries: olderEntryCount > 0 };
+  return {
+    data,
+    startDate,
+    endDate,
+    timelineEntries,
+    hasOlderEntries: olderEntryCount > 0,
+  };
 };
 
 // Group entries by date
@@ -193,12 +197,10 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
         </p>
       </div>
 
-      {/* Action Bar: Question + New Entry - AT THE TOP */}
+      {/* Action Bar: Question + New Entry */}
       <RetroWindow title='Actions' className='overflow-hidden'>
-        <div className='flex flex-col sm:flex-row gap-4 sm:items-end sm:justify-between'>
-          <div className='flex-1 max-w-xl'>
-            <Question />
-          </div>
+        <div className='flex items-center gap-3'>
+          <Question />
           <NewEntry />
         </div>
       </RetroWindow>

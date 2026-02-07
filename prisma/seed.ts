@@ -510,7 +510,8 @@ const journalTemplates = [
     mood: 'serene',
     subject: 'sunrise appreciation',
     negative: false,
-    summary: 'Enjoyed a peaceful sunrise from the balcony, cherishing quiet moments.',
+    summary:
+      'Enjoyed a peaceful sunrise from the balcony, cherishing quiet moments.',
     sentimentScore: 7,
   },
   {
@@ -519,7 +520,8 @@ const journalTemplates = [
     mood: 'relieved',
     subject: 'visa application',
     negative: false,
-    summary: 'Completed a tedious visa application process, now waiting for approval.',
+    summary:
+      'Completed a tedious visa application process, now waiting for approval.',
     sentimentScore: 5,
   },
   {

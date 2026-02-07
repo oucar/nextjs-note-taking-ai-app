@@ -182,7 +182,9 @@ export const qa = async (
     relevantDocs = await store.similaritySearch(question, 6);
   }
 
-  const context = relevantDocs.map((doc) => doc.pageContent).join('\n\n---\n\n');
+  const context = relevantDocs
+    .map((doc) => doc.pageContent)
+    .join('\n\n---\n\n');
 
   // Build entry reference info for the model
   const availableEntries = relevantDocs.map((doc) => ({
@@ -199,13 +201,16 @@ export const qa = async (
     new SystemMessage(
       `You are a helpful, friendly assistant that answers questions about the user's journal entries. ` +
         `You have access to their journal entries below. Answer questions naturally and conversationally — ` +
-        `be concise, warm, and direct. If a journal entry mentions something the user asks about, reference ` +
-        `the date and details from that entry.\n\n` +
+        `be concise, warm, and direct. When mentioning specific days, just use the date (like "November 15th" or "last Tuesday").\n\n` +
         `When the user asks about their "best days", "happiest moments", or similar, list the most positive entries. ` +
         `When they ask about "worst days" or "hardest times", list the most negative entries.\n\n` +
-        `IMPORTANT: In your response, include the entry IDs of any journal entries you reference or that are relevant. ` +
-        `Include entries in referencedEntries when discussing specific days, events, moments, or when listing best/worst days.\n\n` +
-        `AVAILABLE ENTRIES (with IDs):\n${JSON.stringify(availableEntries, null, 2)}\n\n` +
+        `IMPORTANT FORMATTING RULES:\n` +
+        `- NEVER include Entry IDs, GUIDs, or UUIDs in your answer text - they look ugly\n` +
+        `- Just mention dates and brief descriptions naturally\n` +
+        `- Keep your response clean and readable - use short paragraphs\n` +
+        `- For lists, use simple numbered lists with dates and brief descriptions\n\n` +
+        `In the referencedEntries array, include the IDs of entries you mention so they can be linked.\n\n` +
+        `AVAILABLE ENTRIES:\n${JSON.stringify(availableEntries, null, 2)}\n\n` +
         `JOURNAL ENTRIES:\n${context}`
     ),
     ...history.map((msg) =>
