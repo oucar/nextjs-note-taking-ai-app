@@ -36,6 +36,25 @@ const analysisSchema = z.object({
     ),
 });
 
+// Schema for Q&A responses with entry references
+const qaResponseSchema = z.object({
+  answer: z
+    .string()
+    .describe('The natural conversational answer to the user question.'),
+  referencedEntries: z
+    .array(
+      z.object({
+        id: z.string().describe('The entry ID'),
+        date: z.string().describe('The date of the entry (YYYY-MM-DD)'),
+        subject: z.string().describe('Brief subject/topic of the entry'),
+        sentimentScore: z.number().describe('The sentiment score of the entry'),
+      })
+    )
+    .describe(
+      'Array of journal entries that are directly relevant to the answer. Include entries when discussing specific days, events, or moments. For "best days" include top positive entries, for "worst days" include most negative entries.'
+    ),
+});
+
 const getPrompt = async (content: string) => {
   const prompt = new PromptTemplate({
     template: `Analyze the following journal entry. Pay close attention to the overall emotional arc — if the entry starts negative but ends positive (or vice versa), weight the conclusion more heavily in your scoring.
@@ -64,6 +83,16 @@ export const analyzeEntry = async (entry: { content: string }) => {
   };
 };
 
+export type QAResponse = {
+  answer: string;
+  referencedEntries: Array<{
+    id: string;
+    date: string;
+    subject: string;
+    sentimentScore: number;
+  }>;
+};
+
 export const qa = async (
   question: string,
   entries: Array<{
@@ -79,14 +108,15 @@ export const qa = async (
     } | null;
   }>,
   history: Array<{ role: 'human' | 'ai'; content: string }> = []
-) => {
+): Promise<QAResponse> => {
   const docs = entries.map((entry) => {
     const dateStr =
       entry.createdAt instanceof Date
         ? entry.createdAt.toISOString().split('T')[0]
         : new Date(entry.createdAt).toISOString().split('T')[0];
 
-    let enrichedContent = `[Date: ${dateStr}]\n`;
+    let enrichedContent = `[Entry ID: ${entry.id}]\n`;
+    enrichedContent += `[Date: ${dateStr}]\n`;
 
     if (entry.analysis) {
       enrichedContent += `[Mood: ${entry.analysis.mood}]\n`;
@@ -100,23 +130,82 @@ export const qa = async (
 
     return new Document({
       pageContent: enrichedContent,
-      metadata: { source: entry.id, date: dateStr },
+      metadata: {
+        source: entry.id,
+        date: dateStr,
+        subject: entry.analysis?.subject || 'Journal entry',
+        sentimentScore: entry.analysis?.sentimentScore ?? 0,
+      },
     });
   });
 
-  const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
-  const embeddings = new OpenAIEmbeddings();
-  const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
-  const relevantDocs = await store.similaritySearch(question, 4);
+  // Detect if user is asking for best/worst days
+  const lowerQ = question.toLowerCase();
+  const isBestWorstQuery =
+    lowerQ.includes('best day') ||
+    lowerQ.includes('worst day') ||
+    lowerQ.includes('happiest') ||
+    lowerQ.includes('saddest') ||
+    lowerQ.includes('most positive') ||
+    lowerQ.includes('most negative') ||
+    lowerQ.includes('top days') ||
+    lowerQ.includes('good days') ||
+    lowerQ.includes('bad days');
+
+  let relevantDocs: Document[];
+
+  if (isBestWorstQuery) {
+    // Sort all entries by sentiment and pick top/bottom
+    const sortedDocs = [...docs].sort(
+      (a, b) =>
+        (b.metadata.sentimentScore as number) -
+        (a.metadata.sentimentScore as number)
+    );
+
+    if (
+      lowerQ.includes('worst') ||
+      lowerQ.includes('saddest') ||
+      lowerQ.includes('negative') ||
+      lowerQ.includes('bad')
+    ) {
+      // Get bottom entries (most negative)
+      relevantDocs = sortedDocs.slice(-10).reverse();
+    } else {
+      // Get top entries (most positive)
+      relevantDocs = sortedDocs.slice(0, 10);
+    }
+  } else {
+    // Normal similarity search
+    const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+    const embeddings = new OpenAIEmbeddings();
+    const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
+    relevantDocs = await store.similaritySearch(question, 6);
+  }
 
   const context = relevantDocs.map((doc) => doc.pageContent).join('\n\n---\n\n');
+
+  // Build entry reference info for the model
+  const availableEntries = relevantDocs.map((doc) => ({
+    id: doc.metadata.source as string,
+    date: doc.metadata.date as string,
+    subject: doc.metadata.subject as string,
+    sentimentScore: doc.metadata.sentimentScore as number,
+  }));
+
+  const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
+  const structuredLlm = llm.withStructuredOutput(qaResponseSchema);
 
   const messages = [
     new SystemMessage(
       `You are a helpful, friendly assistant that answers questions about the user's journal entries. ` +
         `You have access to their journal entries below. Answer questions naturally and conversationally — ` +
         `be concise, warm, and direct. If a journal entry mentions something the user asks about, reference ` +
-        `the date and details from that entry. Never say you don't have information if it's present in the entries below.\n\n` +
+        `the date and details from that entry.\n\n` +
+        `When the user asks about their "best days", "happiest moments", or similar, list the most positive entries. ` +
+        `When they ask about "worst days" or "hardest times", list the most negative entries.\n\n` +
+        `IMPORTANT: In your response, include the entry IDs of any journal entries you reference or that are relevant. ` +
+        `Include entries in referencedEntries when discussing specific days, events, moments, or when listing best/worst days.\n\n` +
+        `AVAILABLE ENTRIES (with IDs):\n${JSON.stringify(availableEntries, null, 2)}\n\n` +
         `JOURNAL ENTRIES:\n${context}`
     ),
     ...history.map((msg) =>
@@ -127,6 +216,6 @@ export const qa = async (
     new HumanMessage(question),
   ];
 
-  const res = await llm.invoke(messages);
-  return res.content as string;
+  const res = await structuredLlm.invoke(messages);
+  return res as QAResponse;
 };

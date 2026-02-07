@@ -6,7 +6,7 @@ import Spinner from './Spinner';
 import { useRouter } from 'next/navigation';
 import { scoreToColor } from '@/util/color';
 import { RetroWindow, RetroButton, RetroBadge } from '@/components/retro';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Pencil, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 const SentimentBar = ({ score }: { score: number }) => {
@@ -44,6 +44,7 @@ const Editor = ({ entry }) => {
   const [text, setText] = useState(entry.content);
   const [currentEntry, setEntry] = useState(entry);
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const router = useRouter();
 
   const analysis = currentEntry.analysis;
@@ -59,7 +60,7 @@ const Editor = ({ entry }) => {
   useAutosave({
     data: text,
     onSave: async (_text) => {
-      if (_text === entry.content) return;
+      if (_text === entry.content || !isEditMode) return;
       setIsSaving(true);
 
       const { data } = await updateEntry(entry.id, { content: _text });
@@ -102,29 +103,59 @@ const Editor = ({ entry }) => {
         <RetroWindow
           title={analysis?.subject || dateTitle}
           actions={
-            <div className='flex items-center gap-2'>
-              {isSaving ? (
-                <div className='flex items-center gap-2 text-xs'>
-                  <Spinner />
-                  <span>Saving...</span>
-                </div>
-              ) : (
-                <div className='flex items-center gap-2 text-xs'>
-                  <span className='inline-block w-2 h-2 bg-green-500' />
-                  <span>Saved</span>
-                </div>
+            <div className='flex items-center gap-3'>
+              {/* Edit Mode Toggle */}
+              <RetroButton
+                variant={isEditMode ? 'default' : 'ghost'}
+                size='sm'
+                onClick={() => setIsEditMode(!isEditMode)}
+              >
+                {isEditMode ? (
+                  <>
+                    <Eye className='h-3 w-3' />
+                    <span>View</span>
+                  </>
+                ) : (
+                  <>
+                    <Pencil className='h-3 w-3' />
+                    <span>Edit</span>
+                  </>
+                )}
+              </RetroButton>
+
+              {/* Save Status */}
+              {isEditMode && (
+                <>
+                  {isSaving ? (
+                    <div className='flex items-center gap-2 text-xs'>
+                      <Spinner />
+                      <span>Saving...</span>
+                    </div>
+                  ) : (
+                    <div className='flex items-center gap-2 text-xs'>
+                      <span className='inline-block w-2 h-2 bg-green-500' />
+                      <span>Saved</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           }
           className='min-h-[400px] flex flex-col'
           contentClassName='flex-1 p-0'
         >
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className='w-full h-full min-h-[350px] resize-none p-4 text-base leading-relaxed bg-background border-0 focus:outline-none'
-            placeholder='Write your thoughts...'
-          />
+          {isEditMode ? (
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className='w-full h-full min-h-[350px] resize-none p-4 text-base leading-relaxed bg-background border-0 focus:outline-none'
+              placeholder='Write your thoughts...'
+            />
+          ) : (
+            <div className='w-full h-full min-h-[350px] p-4 text-base leading-relaxed bg-background whitespace-pre-wrap'>
+              {text}
+            </div>
+          )}
         </RetroWindow>
 
         {/* Right: Analysis Panel */}
@@ -162,6 +193,15 @@ const Editor = ({ entry }) => {
                 >
                   {analysis?.negative ? 'Yes' : 'No'}
                 </RetroBadge>
+              </div>
+
+              <div className='space-y-1'>
+                <p className='text-xs font-bold uppercase tracking-wide text-muted-foreground'>
+                  Summary
+                </p>
+                <p className='text-sm text-muted-foreground'>
+                  {analysis?.summary || '—'}
+                </p>
               </div>
 
               <div className='space-y-1'>

@@ -70,10 +70,20 @@ const getEntries = async (page: number) => {
     },
   });
 
-  // Also fetch timeline entries (last 30 days, fixed)
+  // Check if there are older entries (for pagination)
+  const olderEntryCount = await prisma.journalEntry.count({
+    where: {
+      userId: user.id,
+      createdAt: {
+        lt: startDate,
+      },
+    },
+  });
+
+  // Also fetch timeline entries (last 60 days, fixed)
   const timelineEntries = await getTimelineEntries(user.id);
 
-  return { data, startDate, endDate, timelineEntries };
+  return { data, startDate, endDate, timelineEntries, hasOlderEntries: olderEntryCount > 0 };
 };
 
 // Group entries by date
@@ -110,41 +120,54 @@ const groupEntriesByDate = (entries: JournalEntry[]) => {
   return Object.entries(groups);
 };
 
-const PaginationControls = ({ page }: { page: number }) => {
+const PaginationControls = ({
+  page,
+  hasOlderEntries,
+}: {
+  page: number;
+  hasOlderEntries: boolean;
+}) => {
   const olderPage = page + 1; // further back in time
   const newerPage = page - 1; // closer to today
   const hasNewer = page > 0;
 
+  // Don't render if there's nothing to navigate
+  if (!hasNewer && !hasOlderEntries) return null;
+
   return (
     <div className='flex items-center justify-between text-xs sm:text-sm text-muted-foreground'>
-      <Link
-        href={`/journal?page=${olderPage}`}
-        className='inline-flex items-center gap-1 hover:underline'
-      >
-        <span>{''}</span>
-        <span>Older 30 days</span>
-      </Link>
-      <span className='font-medium tracking-tight uppercase'>
-        Page {page + 1}
-      </span>
+      {/* Newer on left */}
       {hasNewer ? (
         <Link
           href={newerPage === 0 ? '/journal' : `/journal?page=${newerPage}`}
           className='inline-flex items-center gap-1 hover:underline'
         >
+          <span>&larr;</span>
           <span>Newer 30 days</span>
-          <span>{''}</span>
         </Link>
       ) : (
-        <span className='inline-flex items-center gap-1 opacity-40'>
-          <span>Newer 30 days</span>
-          <span>{''}</span>
-        </span>
+        <div />
+      )}
+
+      <span className='font-medium tracking-tight uppercase'>
+        Page {page + 1}
+      </span>
+
+      {/* Older on right */}
+      {hasOlderEntries ? (
+        <Link
+          href={`/journal?page=${olderPage}`}
+          className='inline-flex items-center gap-1 hover:underline'
+        >
+          <span>Older 30 days</span>
+          <span>&rarr;</span>
+        </Link>
+      ) : (
+        <div />
       )}
     </div>
   );
 };
-
 type JournalPageProps = {
   searchParams?: {
     page?: string;
@@ -155,7 +178,7 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
   const rawPage = Number(searchParams?.page ?? '0');
   const page = Number.isNaN(rawPage) || rawPage < 0 ? 0 : rawPage;
 
-  const { data, timelineEntries } = await getEntries(page);
+  const { data, timelineEntries, hasOlderEntries } = await getEntries(page);
   const groupedEntries = groupEntriesByDate(data);
 
   return (
@@ -184,7 +207,7 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
       <MoodInsights entries={timelineEntries} />
 
       {/* Pagination Controls - Under Mood Insights */}
-      <PaginationControls page={page} />
+      <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
 
       {/* Entries List - Grouped by Day */}
       <div className='space-y-4'>
@@ -215,7 +238,7 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
       </div>
 
       {/* Pagination Controls - Bottom */}
-      <PaginationControls page={page} />
+      <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
     </div>
   );
 };

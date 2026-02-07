@@ -502,6 +502,233 @@ const journalTemplates = [
       'Experienced a significant financial loss due to the stock market crash.',
     sentimentScore: -10,
   },
+
+  // Additional entries for 90 days variety
+  {
+    content:
+      'Woke up early to catch the sunrise from my balcony. The sky turned from deep purple to orange in just minutes. These quiet moments before the world wakes up are becoming my favorite part of the day.',
+    mood: 'serene',
+    subject: 'sunrise appreciation',
+    negative: false,
+    summary: 'Enjoyed a peaceful sunrise from the balcony, cherishing quiet moments.',
+    sentimentScore: 7,
+  },
+  {
+    content:
+      'Finally submitted my visa application after weeks of gathering documents. The process was exhausting, but having it done feels like a weight off my shoulders. Now the waiting game begins.',
+    mood: 'relieved',
+    subject: 'visa application',
+    negative: false,
+    summary: 'Completed a tedious visa application process, now waiting for approval.',
+    sentimentScore: 5,
+  },
+  {
+    content:
+      'Got stuck in an elevator for twenty minutes today. At first I panicked, but then I focused on my breathing and got through it. Proud of how I handled the situation.',
+    mood: 'resilient',
+    subject: 'stuck in elevator',
+    negative: false,
+    summary: 'Managed anxiety well while stuck in an elevator.',
+    sentimentScore: 3,
+  },
+  {
+    content:
+      'My favorite band announced a reunion tour and I managed to get tickets! Been listening to their albums since high school. This will be such a nostalgic experience.',
+    mood: 'thrilled',
+    subject: 'concert tickets',
+    negative: false,
+    summary: 'Scored tickets to see a beloved band from teenage years.',
+    sentimentScore: 9,
+  },
+  {
+    content:
+      'Had to put down a boundary with a friend who keeps asking for favors but never reciprocates. It was uncomfortable but necessary. Learning that saying no is a form of self-respect.',
+    mood: 'empowered',
+    subject: 'setting boundaries',
+    negative: false,
+    summary: 'Practiced boundary-setting with a one-sided friendship.',
+    sentimentScore: 4,
+  },
+  {
+    content:
+      'Power outage for six hours today. No wifi, no TV, no way to cook. Ended up reading by candlelight like it was the 1800s. Oddly peaceful once I stopped fighting it.',
+    mood: 'accepting',
+    subject: 'power outage',
+    negative: false,
+    summary: 'Found unexpected peace during a long power outage.',
+    sentimentScore: 2,
+  },
+  {
+    content:
+      'Bombed a job interview completely. Mind went blank on basic questions I know the answers to. Embarrassing and discouraging. Need to practice more before the next one.',
+    mood: 'embarrassed',
+    subject: 'failed interview',
+    negative: true,
+    summary: 'Performed poorly in a job interview due to nerves.',
+    sentimentScore: -6,
+  },
+  {
+    content:
+      'Discovered a hidden hiking trail near my apartment that I never knew existed. The path wound through trees and ended at a small waterfall. Living here for years and still finding new spots.',
+    mood: 'delighted',
+    subject: 'discovering nature',
+    negative: false,
+    summary: 'Found a beautiful hidden hiking trail with a waterfall nearby.',
+    sentimentScore: 8,
+  },
+  {
+    content:
+      'My therapist challenged me to write down three things I like about myself. It was harder than expected. Going to keep working on self-compassion.',
+    mood: 'introspective',
+    subject: 'therapy homework',
+    negative: false,
+    summary: 'Struggled with a self-appreciation exercise from therapy.',
+    sentimentScore: 2,
+  },
+  {
+    content:
+      'Spent the afternoon at a farmers market. Bought fresh bread, local honey, and way too many tomatoes. The simple pleasure of supporting small vendors feels good.',
+    mood: 'wholesome',
+    subject: 'farmers market trip',
+    negative: false,
+    summary: 'Enjoyed shopping at the local farmers market.',
+    sentimentScore: 6,
+  },
+  {
+    content:
+      'Got rear-ended at a stoplight. Nobody was hurt, but the hassle of insurance claims and rental cars is already stressful. Why does paperwork have to be so complicated?',
+    mood: 'stressed',
+    subject: 'car accident',
+    negative: true,
+    summary: 'Dealing with the aftermath of a minor car accident.',
+    sentimentScore: -4,
+  },
+  {
+    content:
+      'Made homemade pasta from scratch for the first time. The dough was incredibly satisfying to knead, and the result was so much better than store-bought. Might become a weekend tradition.',
+    mood: 'accomplished',
+    subject: 'homemade pasta',
+    negative: false,
+    summary: 'Successfully made pasta from scratch and loved the process.',
+    sentimentScore: 7,
+  },
+  {
+    content:
+      'Joined a book club because I wanted to meet people outside of work. First meeting was today and everyone was so welcoming. Already looking forward to next month.',
+    mood: 'hopeful',
+    subject: 'joining book club',
+    negative: false,
+    summary: 'Had a great first experience at a new book club.',
+    sentimentScore: 6,
+  },
+  {
+    content:
+      'Forgot to save my work and lost three hours of progress when the app crashed. That familiar sinking feeling. Auto-save is going on immediately.',
+    mood: 'frustrated',
+    subject: 'lost work',
+    negative: true,
+    summary: 'Lost significant work due to forgetting to save.',
+    sentimentScore: -5,
+  },
+  {
+    content:
+      'Took a mental health day from work. Spent it doing absolutely nothing productive and refused to feel guilty about it. Sometimes rest is the most productive thing you can do.',
+    mood: 'rested',
+    subject: 'mental health day',
+    negative: false,
+    summary: 'Took a deliberate rest day without guilt.',
+    sentimentScore: 6,
+  },
+  {
+    content:
+      'My nephew called just to tell me about his science project. Kids enthusiasm is contagious. Made me remember what it felt like to be excited about learning.',
+    mood: 'touched',
+    subject: 'nephew call',
+    negative: false,
+    summary: 'Had a heartwarming call with an enthusiastic nephew.',
+    sentimentScore: 7,
+  },
+  {
+    content:
+      'Couldnt find parking for 45 minutes and ended up late to the event I was so excited about. Missed the opening performance. Such a small thing but it ruined my whole evening.',
+    mood: 'disappointed',
+    subject: 'parking frustration',
+    negative: true,
+    summary: 'Parking troubles caused missing an anticipated event.',
+    sentimentScore: -4,
+  },
+  {
+    content:
+      'Started a 30-day photography challenge. Day one: photograph something blue. Walked around noticing blue things everywhere. Amazing how intention changes perception.',
+    mood: 'engaged',
+    subject: 'photography challenge',
+    negative: false,
+    summary: 'Began a creative photo challenge and noticed new perspectives.',
+    sentimentScore: 5,
+  },
+  {
+    content:
+      'Received a handwritten letter from a friend abroad. In the age of instant messaging, the effort of writing by hand feels so meaningful. Going to write back the same way.',
+    mood: 'appreciative',
+    subject: 'handwritten letter',
+    negative: false,
+    summary: 'Received and appreciated a handwritten letter from a friend.',
+    sentimentScore: 7,
+  },
+  {
+    content:
+      'Food poisoning from dinner last night. Spent the whole day miserable in bed. Never eating at that restaurant again. Just want to feel human.',
+    mood: 'sick',
+    subject: 'food poisoning',
+    negative: true,
+    summary: 'Suffered through food poisoning and felt terrible all day.',
+    sentimentScore: -7,
+  },
+  {
+    content:
+      'Learned how to change a tire today after getting a flat on a country road. YouTube tutorials to the rescue. Felt capable and independent once I figured it out.',
+    mood: 'self-sufficient',
+    subject: 'changing tire',
+    negative: false,
+    summary: 'Successfully changed a flat tire for the first time.',
+    sentimentScore: 6,
+  },
+  {
+    content:
+      'Anniversary of losing my grandmother. Visited her grave and told her about everything happening in my life. Miss her wisdom and the way she made everyone feel seen.',
+    mood: 'grieving',
+    subject: 'grief anniversary',
+    negative: true,
+    summary: 'Honored grandmother on the anniversary of her passing.',
+    sentimentScore: -3,
+  },
+  {
+    content:
+      'Finally got around to framing and hanging my favorite photos. The apartment feels more like home now with personal touches on the walls.',
+    mood: 'settled',
+    subject: 'home decorating',
+    negative: false,
+    summary: 'Made the apartment feel homier by hanging personal photos.',
+    sentimentScore: 5,
+  },
+  {
+    content:
+      'Pulled an all-nighter to meet a deadline. The work got done but I feel like a zombie. Really need to stop leaving things to the last minute.',
+    mood: 'depleted',
+    subject: 'all-nighter deadline',
+    negative: true,
+    summary: 'Met a deadline but exhausted from an all-nighter.',
+    sentimentScore: -4,
+  },
+  {
+    content:
+      'Best wedding I have ever attended! My best friend married the love of their life and I got to be there for every moment. Cried happy tears during the vows.',
+    mood: 'overjoyed',
+    subject: 'best friend wedding',
+    negative: false,
+    summary: 'Celebrated at best friends wedding with overwhelming joy.',
+    sentimentScore: 10,
+  },
 ];
 
 // Function to generate color from sentiment score
@@ -572,8 +799,8 @@ async function main() {
   });
   console.log(`Deleted ${deletedEntries.count} existing entries`);
 
-  // Generate entries for the last 70 days
-  const DAYS = 70;
+  // Generate entries for the last 90 days
+  const DAYS = 90;
   const entries: Array<{
     content: string;
     createdAt: Date;

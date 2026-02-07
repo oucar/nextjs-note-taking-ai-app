@@ -4,11 +4,41 @@ import { askQuestion } from '@/util/api';
 import { useState, useRef, useEffect } from 'react';
 import { RetroButton } from '@/components/retro';
 import Spinner from './Spinner';
-import { MessageCircle, Trash2, Send } from 'lucide-react';
+import { MessageCircle, Trash2, Send, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import { scoreToColor } from '@/util/color';
+
+type ReferencedEntry = {
+  id: string;
+  date: string;
+  subject: string;
+  sentimentScore: number;
+};
 
 type Message = {
   role: 'human' | 'ai';
   content: string;
+  referencedEntries?: ReferencedEntry[];
+};
+
+const EntryLink = ({ entry }: { entry: ReferencedEntry }) => {
+  const color = scoreToColor(entry.sentimentScore);
+  const dateFormatted = new Date(entry.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return (
+    <Link
+      href={`/journal/${entry.id}`}
+      className='inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold border-2 border-foreground/20 bg-card hover:bg-accent transition-colors no-underline'
+      style={{ borderLeftColor: color, borderLeftWidth: '4px' }}
+    >
+      <span className='text-muted-foreground'>{dateFormatted}</span>
+      <span className='truncate max-w-[120px]'>{entry.subject}</span>
+      <ExternalLink className='h-3 w-3 text-muted-foreground' />
+    </Link>
+  );
 };
 
 const Question = () => {
@@ -28,7 +58,7 @@ const Question = () => {
     const userMessage = question.trim();
     setQuestion('');
 
-    const updatedMessages = [
+    const updatedMessages: Message[] = [
       ...messages,
       { role: 'human' as const, content: userMessage },
     ];
@@ -37,10 +67,17 @@ const Question = () => {
 
     const { data } = await askQuestion(
       userMessage,
-      updatedMessages.slice(0, -1)
+      updatedMessages.slice(0, -1).map((m) => ({ role: m.role, content: m.content }))
     );
 
-    setMessages([...updatedMessages, { role: 'ai', content: data }]);
+    setMessages([
+      ...updatedMessages,
+      {
+        role: 'ai',
+        content: data.answer,
+        referencedEntries: data.referencedEntries,
+      },
+    ]);
     setLoading(false);
   };
 
@@ -69,11 +106,11 @@ const Question = () => {
 
       {/* Messages */}
       {messages.length > 0 && (
-        <div className='border-2 border-foreground/10 bg-background p-3 max-h-60 overflow-y-auto scrollbar-thin space-y-2'>
+        <div className='border-2 border-foreground/10 bg-background p-3 max-h-80 overflow-y-auto scrollbar-thin space-y-3'>
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === 'human' ? 'justify-end' : 'justify-start'}`}
+              className={`flex flex-col ${msg.role === 'human' ? 'items-end' : 'items-start'}`}
             >
               <div
                 className={`max-w-[85%] px-3 py-2 text-sm border-2 ${
@@ -84,6 +121,16 @@ const Question = () => {
               >
                 {msg.content}
               </div>
+              {/* Show referenced entries for AI messages */}
+              {msg.role === 'ai' &&
+                msg.referencedEntries &&
+                msg.referencedEntries.length > 0 && (
+                  <div className='mt-2 flex flex-wrap gap-2 max-w-[85%]'>
+                    {msg.referencedEntries.map((entry) => (
+                      <EntryLink key={entry.id} entry={entry} />
+                    ))}
+                  </div>
+                )}
             </div>
           ))}
           {loading && (
