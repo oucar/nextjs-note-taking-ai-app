@@ -53,14 +53,14 @@ MOOD is an AI-powered journaling app built with Next.js (App Router). You write 
 
 There are two AI workflows in `util/ai.ts`:
 
-1) **Entry analysis** (`analyzeEntry`)
+1. **Entry analysis** (`analyzeEntry`)
 
 - Uses a structured output schema (Zod) to force a consistent JSON-like shape:
   - `mood`, `subject`, `negative`, `summary`, `sentimentScore`
 - Converts `sentimentScore` (-10 to 10) into a UI color via `util/color.ts`.
 - Triggered from `PATCH /api/entry/[id]` after saving edits.
 
-2) **Journal Q&A** (`qa`)
+2. **Journal Q&A** (`qa`)
 
 - Takes your entries (and their analysis) and turns them into documents.
 - For normal questions, it uses embeddings + an in-memory vector store to pick the most relevant entries.
@@ -97,30 +97,30 @@ Create a `.env.local` file in the project root.
 
 ## Getting started (local development)
 
-1) Install dependencies
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-2) Configure environment variables
+2. Configure environment variables
 
 - Add all values listed in **Environment variables** to `.env.local`.
 
-3) Generate Prisma Client and run migrations
+3. Generate Prisma Client and run migrations
 
 ```bash
 npx prisma generate
 npx prisma migrate dev
 ```
 
-4) (Optional) Seed the database
+4. (Optional) Seed the database
 
 ```bash
 npm run db:seed
 ```
 
-5) Start the dev server
+5. Start the dev server
 
 ```bash
 npm run dev
