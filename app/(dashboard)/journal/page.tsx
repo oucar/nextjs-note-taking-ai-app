@@ -10,6 +10,30 @@ import { RetroWindow } from '@/components/retro';
 
 const DAYS_PER_PAGE = 30;
 
+// Get entries for the mood timeline (last 60 days to cover current + previous periods)
+const getTimelineEntries = async (userId: string) => {
+  const now = new Date();
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() - 60); // 60 days for 30 current + 30 previous
+  startDate.setHours(0, 0, 0, 0);
+
+  return prisma.journalEntry.findMany({
+    where: {
+      userId,
+      createdAt: {
+        gte: startDate,
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      analysis: true,
+    },
+  });
+};
+
+// Get paginated entries for the list
 const getEntries = async (page: number) => {
   let user;
   try {
@@ -46,7 +70,10 @@ const getEntries = async (page: number) => {
     },
   });
 
-  return { data, startDate, endDate };
+  // Also fetch timeline entries (last 30 days, fixed)
+  const timelineEntries = await getTimelineEntries(user.id);
+
+  return { data, startDate, endDate, timelineEntries };
 };
 
 // Group entries by date
@@ -128,7 +155,7 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
   const rawPage = Number(searchParams?.page ?? '0');
   const page = Number.isNaN(rawPage) || rawPage < 0 ? 0 : rawPage;
 
-  const { data, startDate, endDate } = await getEntries(page);
+  const { data, timelineEntries } = await getEntries(page);
   const groupedEntries = groupEntriesByDate(data);
 
   return (
@@ -143,13 +170,7 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
         </p>
       </div>
 
-      {/* Pagination Controls - Top */}
-      <PaginationControls page={page} />
-
-      {/* Mood Insights - Timeline & Heatmap for current window */}
-      <MoodInsights entries={data} />
-
-      {/* Action Bar: Question + New Entry */}
+      {/* Action Bar: Question + New Entry - AT THE TOP */}
       <RetroWindow title='Actions' className='overflow-hidden'>
         <div className='flex flex-col sm:flex-row gap-4 sm:items-end sm:justify-between'>
           <div className='flex-1 max-w-xl'>
@@ -158,6 +179,12 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
           <NewEntry />
         </div>
       </RetroWindow>
+
+      {/* Mood Insights - Timeline only (fixed last 30 days data) */}
+      <MoodInsights entries={timelineEntries} />
+
+      {/* Pagination Controls - Under Mood Insights */}
+      <PaginationControls page={page} />
 
       {/* Entries List - Grouped by Day */}
       <div className='space-y-4'>

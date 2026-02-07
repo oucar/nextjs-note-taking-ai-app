@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 const links = [
   { name: 'Journals', href: '/journal' },
+  { name: 'Statistics', href: '/statistics' },
   { name: 'History', href: '/history' },
 ];
 

@@ -567,7 +567,191 @@ const MoodHeatmap = ({ entries }: { entries: AnalysisData[] }) => {
   );
 };
 
-// Main MoodInsights Component
+// Export individual components for use in different pages
+export { MoodTimeline, MoodHeatmap };
+
+// Process timeline data for a specific date range (for Statistics page)
+const processTimelineDataForRange = (
+  entries: AnalysisData[],
+  mode: 'alltime' | '30days'
+): TimelineDataPoint[] => {
+  if (mode === '30days') {
+    return processTimelineData(entries, '30days');
+  }
+
+  // For all-time, group by week instead of day
+  const entriesByWeek: Record<string, number[]> = {};
+  const weekLabels: Record<string, string> = {};
+
+  entries.forEach((entry) => {
+    if (entry.analysis?.sentimentScore == null) return;
+    const date = new Date(entry.createdAt);
+    // Get week start (Sunday)
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - date.getDay());
+    const key = getDateKey(weekStart);
+    if (!entriesByWeek[key]) {
+      entriesByWeek[key] = [];
+      weekLabels[key] = weekStart.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+    entriesByWeek[key].push(entry.analysis.sentimentScore);
+  });
+
+  // Sort by date and return
+  return Object.keys(entriesByWeek)
+    .sort()
+    .map((key) => {
+      const scores = entriesByWeek[key];
+      const avg =
+        scores.length > 0
+          ? Math.round(
+              (scores.reduce((a, b) => a + b, 0) / scores.length) * 10
+            ) / 10
+          : null;
+      return {
+        date: key,
+        label: weekLabels[key],
+        current: avg,
+        currentCount: scores.length,
+      };
+    });
+};
+
+// Statistics page Mood Timeline with All Time / 30 Days toggle
+const StatsMoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
+  const [mode, setMode] = React.useState<'alltime' | '30days'>('30days');
+  const data = React.useMemo(
+    () => processTimelineDataForRange(entries, mode),
+    [entries, mode]
+  );
+
+  const hasData = data.some((d) => d.current != null);
+
+  return (
+    <div className='space-y-4'>
+      {/* Mode Toggle */}
+      <div className='flex items-center justify-between'>
+        <h3 className='text-sm font-bold uppercase tracking-wide'>
+          Mood Timeline
+        </h3>
+        <div className='flex border-2 border-foreground/20'>
+          <button
+            onClick={() => setMode('30days')}
+            className={cn(
+              'px-3 py-1 text-xs font-bold uppercase transition-colors',
+              mode === '30days'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card hover:bg-accent'
+            )}
+          >
+            30 Days
+          </button>
+          <button
+            onClick={() => setMode('alltime')}
+            className={cn(
+              'px-3 py-1 text-xs font-bold uppercase transition-colors border-l-2 border-foreground/20',
+              mode === 'alltime'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card hover:bg-accent'
+            )}
+          >
+            All Time
+          </button>
+        </div>
+      </div>
+
+      {/* Chart */}
+      {hasData ? (
+        <div className='h-[200px] w-full'>
+          <ResponsiveContainer width='100%' height='100%'>
+            <LineChart
+              data={data}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <XAxis
+                dataKey='label'
+                tick={{ fontSize: 10, fontFamily: 'monospace' }}
+                stroke='var(--muted-foreground)'
+                tickLine={false}
+                interval={mode === 'alltime' ? 'preserveStartEnd' : 4}
+              />
+              <YAxis
+                domain={[-10, 10]}
+                tick={{ fontSize: 10, fontFamily: 'monospace' }}
+                stroke='var(--muted-foreground)'
+                tickLine={false}
+                ticks={[-10, -5, 0, 5, 10]}
+              />
+              <ReferenceLine
+                y={0}
+                stroke='var(--border)'
+                strokeDasharray='3 3'
+              />
+              <Tooltip content={<TimelineTooltip />} />
+              {mode === '30days' && (
+                <Legend
+                  verticalAlign='top'
+                  align='right'
+                  iconType='square'
+                  wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }}
+                />
+              )}
+              {mode === '30days' && (
+                <Line
+                  name='Previous 30 days'
+                  type='monotone'
+                  dataKey='previous'
+                  stroke='var(--muted-foreground)'
+                  strokeWidth={2}
+                  strokeDasharray='4 4'
+                  dot={<PreviousDot />}
+                  connectNulls
+                />
+              )}
+              <Line
+                name={mode === '30days' ? 'Last 30 days' : 'Weekly average'}
+                type='monotone'
+                dataKey='current'
+                stroke='var(--primary)'
+                strokeWidth={2}
+                dot={<CurrentDot />}
+                connectNulls
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <div className='h-[200px] flex items-center justify-center text-muted-foreground text-sm'>
+          No mood data available
+        </div>
+      )}
+
+      {/* Legend explanation for 30 days mode */}
+      {mode === '30days' && (
+        <div className='flex items-center gap-4 text-xs text-muted-foreground'>
+          <div className='flex items-center gap-1'>
+            <div className='w-8 h-0.5 bg-primary' />
+            <span>Current period</span>
+          </div>
+          <div className='flex items-center gap-1'>
+            <div
+              className='w-8 h-0.5 bg-muted-foreground'
+              style={{ borderTop: '2px dashed var(--muted-foreground)' }}
+            />
+            <span>Previous period</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export { StatsMoodTimeline };
+
+// Main MoodInsights Component (used on journal page - timeline only)
 export default function MoodInsights({ entries }: MoodInsightsProps) {
   const [isOpen, setIsOpen] = React.useState(true);
 
@@ -584,14 +768,46 @@ export default function MoodInsights({ entries }: MoodInsightsProps) {
         }
       >
         <CollapsibleContent>
+          {/* Mood Timeline only */}
+          <MoodTimeline entries={entries} />
+        </CollapsibleContent>
+
+        {/* Collapsed state summary */}
+        {!isOpen && (
+          <div className='text-sm text-muted-foreground text-center py-2'>
+            Click expand to view mood timeline
+          </div>
+        )}
+      </RetroWindow>
+    </Collapsible>
+  );
+}
+
+// Full Statistics MoodInsights Component (used on statistics page)
+export function FullMoodInsights({ entries }: MoodInsightsProps) {
+  const [isOpen, setIsOpen] = React.useState(true);
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <RetroWindow
+        title='Mood Statistics'
+        actions={
+          <CollapsibleTrigger asChild>
+            <button className='px-2 py-0.5 text-xs font-bold uppercase bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors'>
+              {isOpen ? '▲ Collapse' : '▼ Expand'}
+            </button>
+          </CollapsibleTrigger>
+        }
+      >
+        <CollapsibleContent>
           <div className='space-y-8'>
-            {/* Mood Timeline */}
-            <MoodTimeline entries={entries} />
+            {/* Mood Timeline with All Time / 30 Days */}
+            <StatsMoodTimeline entries={entries} />
 
             {/* Divider */}
             <div className='border-t-2 border-foreground/10' />
 
-            {/* Mood Heatmap */}
+            {/* Mood Heatmap (All Time) */}
             <MoodHeatmap entries={entries} />
           </div>
         </CollapsibleContent>
@@ -599,7 +815,7 @@ export default function MoodInsights({ entries }: MoodInsightsProps) {
         {/* Collapsed state summary */}
         {!isOpen && (
           <div className='text-sm text-muted-foreground text-center py-2'>
-            Click expand to view mood timeline and heatmap
+            Click expand to view mood statistics and heatmap
           </div>
         )}
       </RetroWindow>
