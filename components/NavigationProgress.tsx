@@ -56,7 +56,7 @@ export function NavigationProgress() {
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest('a');
-      
+
       if (link) {
         const href = link.getAttribute('href');
         // Check if it's an internal navigation link
@@ -77,10 +77,7 @@ export function NavigationProgress() {
 
   return (
     <div className='fixed top-0 left-0 right-0 z-[100]'>
-      <Progress 
-        value={progress} 
-        className='h-1 rounded-none bg-transparent'
-      />
+      <Progress value={progress} className='h-1 rounded-none bg-transparent' />
     </div>
   );
 }
