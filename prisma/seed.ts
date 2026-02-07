@@ -494,14 +494,13 @@ const journalTemplates = [
     sentimentScore: -6,
   },
   {
-    content:
-      'Started a tiny balcony garden with herbs and a couple of tomato plants. No idea if they will survive, but getting my hands in the soil felt grounding.',
-    mood: 'hopeful',
-    subject: 'balcony gardening',
-    negative: false,
+    content: 'Stock market is crashed. I lost everything.',
+    mood: 'miserable',
+    subject: 'stock market crash',
+    negative: true,
     summary:
-      'Planted a small container garden and felt hopeful about nurturing something.',
-    sentimentScore: 5,
+      'Experienced a significant financial loss due to the stock market crash.',
+    sentimentScore: -10,
   },
 ];
 
