@@ -1,5 +1,7 @@
 # MOOD — AI Journal (Next.js + Clerk + Prisma + Neon + LangChain/OpenAI)
 
+**Version:** 0.1.1 · **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+
 MOOD is an AI-powered journaling app built with Next.js (App Router). You write journal entries, the app generates a structured “mood analysis” for each entry, and you can chat with your journal to ask questions like “What was my best day?” or “How have I been feeling lately?”.
 
 ## What this app does
@@ -143,8 +145,17 @@ Open http://localhost:3000
 - **No AI output**: ensure `OPENAI_API_KEY` is set. Both entry analysis and Q&A depend on it.
 - **Why analysis updates on edit**: new entries start with neutral placeholder analysis; the real analysis is generated when the entry is updated via `PATCH /api/entry/[id]`.
 
+## Version history
+
+See **[CHANGELOG.md](CHANGELOG.md)** for release notes and version history. Current version: **0.1.1** (2025-02-14).
+
 ## Roadmap ideas
 
 - Webhook-based user sync (create Prisma user automatically when Clerk user is created)
 - Persisted vector store (instead of rebuilding embeddings per Q&A request)
 - More entry lifecycle features using `status` (draft/published/archived)
+- Encryption --> encrypt entries, moods etc
+- PII detection + redaction: optionally mask sensitive info before embedding or sending to an LLM. (Privacy by design: encryption, PII redaction and tenant isolated RAG with audit logging!!)
+- Multi-model routing: cheap model for tagging/summaries, stronger model for final answers and/or automatic fallback
+  .
+  
