@@ -20,9 +20,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Possible improvements
 
 - History chart: formatted date labels on X-axis (e.g. "Feb 14" instead of raw ISO)
-- Statistics: mood distribution pie/bar chart (e.g. count by mood label)
-- Export: download entries or insights as PDF/JSON
-- Onboarding: guided first entry or tooltips for new users
+- Export: download entries or insights as PDF/JSON (not planned for now)
+
+---
+
+## [0.2.0] - 2025-02-14
+
+### Added
+
+- **Mood distribution bar chart** — On the Statistics page, a horizontal bar chart shows how often each mood label appears across your entries (top 12 moods; rest grouped as "Other"). Bars are colored by average sentiment; tooltip shows count and avg score.
+- **Onboarding** — When you have no journal entries, the Journal page shows a welcome card with a short explanation and a "Create your first entry" button that starts your first entry.
 
 ---
 
@@ -49,10 +56,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## Version history (summary)
 
-| Version   | Date       | Notes                    |
-|----------|------------|---------------------------|
-| 0.1.1    | 2025-02-14 | Initial documented release|
-| Unreleased | —        | Roadmap and improvements  |
+| Version   | Date       | Notes                                      |
+|-----------|------------|--------------------------------------------|
+| 0.2.0    | 2025-02-14 | Mood distribution bar chart; onboarding    |
+| 0.1.1    | 2025-02-14 | Initial documented release                 |
+| Unreleased | —        | Roadmap and improvements                   |
 
 ---
 

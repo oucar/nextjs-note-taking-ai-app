@@ -19,6 +19,7 @@ import {
 import { RetroWindow } from '@/components/retro';
 import { scoreToColor } from '@/util/color';
 import { cn } from '@/lib/utils';
+import MoodDistributionChart from '@/components/MoodDistributionChart';
 
 // Types
 type AnalysisData = {
@@ -801,6 +802,12 @@ export function FullMoodInsights({ entries }: MoodInsightsProps) {
       >
         <CollapsibleContent>
           <div className='space-y-8'>
+            {/* Mood Distribution bar chart */}
+            <MoodDistributionChart entries={entries} />
+
+            {/* Divider */}
+            <div className='border-t-2 border-foreground/10' />
+
             {/* Mood Timeline with All Time / 30 Days */}
             <StatsMoodTimeline entries={entries} />
 

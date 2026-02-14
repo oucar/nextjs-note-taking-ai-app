@@ -1,6 +1,6 @@
 # MOOD — AI Journal (Next.js + Clerk + Prisma + Neon + LangChain/OpenAI)
 
-**Version:** 0.1.1 · **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+**Version:** 0.2.0 · **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
 MOOD is an AI-powered journaling app built with Next.js (App Router). You write journal entries, the app generates a structured “mood analysis” for each entry, and you can chat with your journal to ask questions like “What was my best day?” or “How have I been feeling lately?”.
 
@@ -114,6 +114,7 @@ npm install
 ```bash
 npx prisma generate
 npx prisma migrate dev
+npx prisma migrate deploy
 ```
 
 4. (Optional) Seed the database
@@ -144,10 +145,11 @@ Open http://localhost:3000
 - **First sign-in redirect**: if you see an error like “No local DB user found for Clerk id…”, go to `/new-user` (the app also redirects there in several server components). That route creates your Prisma `User` record.
 - **No AI output**: ensure `OPENAI_API_KEY` is set. Both entry analysis and Q&A depend on it.
 - **Why analysis updates on edit**: new entries start with neutral placeholder analysis; the real analysis is generated when the entry is updated via `PATCH /api/entry/[id]`.
+- **`The table 'public.User' does not exist`**: your `DATABASE_URL` is pointing at a database that doesn't have the MOOD schema. Use a **dedicated** Postgres database for this app (e.g. create a new Neon project or branch), set `DATABASE_URL` and `DIRECT_URL` in `.env.local` to that database, then run `npx prisma migrate deploy`. If this DB should be used only for MOOD and you're okay losing other data in it, you can run `npx prisma db push --accept-data-loss` to overwrite the schema (this will drop tables not in the Prisma schema).
 
 ## Version history
 
-See **[CHANGELOG.md](CHANGELOG.md)** for release notes and version history. Current version: **0.1.1** (2025-02-14).
+See **[CHANGELOG.md](CHANGELOG.md)** for release notes and version history. Current version: **0.2.0** (2025-02-14).
 
 ## Roadmap ideas
 
@@ -158,4 +160,3 @@ See **[CHANGELOG.md](CHANGELOG.md)** for release notes and version history. Curr
 - PII detection + redaction: optionally mask sensitive info before embedding or sending to an LLM. (Privacy by design: encryption, PII redaction and tenant isolated RAG with audit logging!!)
 - Multi-model routing: cheap model for tagging/summaries, stronger model for final answers and/or automatic fallback
   .
-  

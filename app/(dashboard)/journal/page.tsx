@@ -2,6 +2,7 @@ import EntryCard from '@/components/EntryCard';
 import NewEntry from '@/components/NewEntry';
 import Question from '@/components/Question';
 import MoodInsights from '@/components/MoodInsights';
+import Onboarding from '@/components/Onboarding';
 import { getUserFromClerkID } from '@/util/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/util/db';
@@ -211,13 +212,15 @@ const JournalPage = async ({ searchParams }: JournalPageProps) => {
       {/* Pagination Controls - Under Mood Insights */}
       <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
 
+      {/* Onboarding when no entries */}
+      {groupedEntries.length === 0 && <Onboarding />}
+
       {/* Entries List - Grouped by Day */}
       <div className='space-y-4'>
         {groupedEntries.length === 0 ? (
           <RetroWindow title='No Entries'>
-            <p className='text-muted-foreground text-center py-8'>
-              No journal entries yet. Click the button above to create your
-              first entry.
+            <p className='text-muted-foreground text-center py-6 text-sm'>
+              Your entries will appear here once you create one.
             </p>
           </RetroWindow>
         ) : (

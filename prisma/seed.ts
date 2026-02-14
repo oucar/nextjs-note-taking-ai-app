@@ -834,6 +834,15 @@ async function main() {
         0
       );
 
+      // Trend: timeline goes from ~-3 (oldest) to ~7 (newest) for a more interesting mood timeline
+      const targetScore = 7 - (daysAgo / (DAYS - 1)) * 10;
+      const blendedScore =
+        0.5 * template.sentimentScore + 0.5 * targetScore;
+      const sentimentScore =
+        Math.round(
+          Math.max(-10, Math.min(10, blendedScore)) * 10
+        ) / 10;
+
       entries.push({
         content: template.content,
         createdAt: entryDate,
@@ -841,7 +850,7 @@ async function main() {
         subject: template.subject,
         negative: template.negative,
         summary: template.summary,
-        sentimentScore: template.sentimentScore,
+        sentimentScore,
       });
     }
   }
