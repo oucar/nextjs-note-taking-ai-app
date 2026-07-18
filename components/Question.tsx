@@ -2,15 +2,16 @@
 
 import { askQuestion } from '@/util/api';
 import { useState, useRef, useEffect, FormEvent } from 'react';
-import { RetroButton } from '@/components/retro';
+import { Button } from '@/components/ui/button';
 import Spinner from './Spinner';
 import {
   MessageCircle,
   Trash2,
-  Send,
+  ArrowUp,
   ExternalLink,
   Maximize2,
   Minimize2,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { scoreToColor } from '@/util/color';
@@ -61,11 +62,15 @@ const EntryLink = ({ entry }: { entry: ReferencedEntry }) => {
       <TooltipTrigger asChild>
         <Link
           href={`/journal/${entry.id}`}
-          className='inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold border-2 border-foreground/20 bg-card hover:bg-accent transition-colors no-underline'
-          style={{ borderLeftColor: color, borderLeftWidth: '3px' }}
+          className='inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card px-2.5 py-1 text-xs font-medium transition-colors hover:bg-accent'
         >
-          <span>{shortDate}</span>
-          <ExternalLink className='h-2.5 w-2.5 text-muted-foreground' />
+          <span
+            aria-hidden
+            className='size-1.5 rounded-full'
+            style={{ backgroundColor: color }}
+          />
+          {shortDate}
+          <ExternalLink className='size-2.5 text-muted-foreground' />
         </Link>
       </TooltipTrigger>
       <TooltipContent side='top' className='max-w-xs'>
@@ -74,7 +79,7 @@ const EntryLink = ({ entry }: { entry: ReferencedEntry }) => {
           <div className='text-muted-foreground'>{entry.subject}</div>
           <div className='flex items-center gap-1'>
             <span
-              className='w-2 h-2 rounded-full'
+              className='size-2 rounded-full'
               style={{ backgroundColor: color }}
             />
             <span className='text-xs'>
@@ -141,65 +146,64 @@ const Question = () => {
     <TooltipProvider>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <RetroButton variant='outline' className='gap-2'>
-            <MessageCircle className='h-4 w-4' />
+          <Button variant='outline' className='gap-2'>
+            <Sparkles className='size-4' />
             Ask your journal
-          </RetroButton>
+          </Button>
         </DialogTrigger>
         <DialogContent
-          className={`flex flex-col gap-0 p-0 transition-all duration-200 ${
+          className={`flex flex-col gap-0 overflow-hidden rounded-2xl p-0 transition-all duration-200 ${
             expanded
-              ? 'sm:max-w-4xl h-[90vh]'
-              : 'sm:max-w-2xl h-[70vh] max-h-[600px]'
+              ? 'h-[90vh] sm:max-w-4xl'
+              : 'h-[70vh] max-h-[600px] sm:max-w-2xl'
           }`}
           showCloseButton={false}
         >
           {/* Header */}
-          <DialogHeader className='p-4 pb-3 border-b-2 border-foreground/10 shrink-0'>
+          <DialogHeader className='shrink-0 border-b border-border/60 px-5 py-4'>
             <div className='flex items-center justify-between'>
-              <DialogTitle className='flex items-center gap-2 text-base font-black uppercase tracking-tight'>
-                <MessageCircle className='h-4 w-4' />
+              <DialogTitle className='flex items-center gap-2 font-serif text-lg font-medium tracking-tight'>
+                <Sparkles className='size-4 text-primary' />
                 Ask your journal
               </DialogTitle>
               <div className='flex items-center gap-1'>
                 {messages.length > 0 && (
-                  <RetroButton
+                  <Button
                     variant='ghost'
                     size='sm'
                     onClick={handleClear}
-                    className='text-xs'
+                    className='gap-1 text-xs text-muted-foreground'
                   >
-                    <Trash2 className='h-3 w-3' />
+                    <Trash2 className='size-3' />
                     Clear
-                  </RetroButton>
+                  </Button>
                 )}
-                <RetroButton
+                <Button
                   variant='ghost'
-                  size='icon'
+                  size='icon-sm'
                   onClick={() => setExpanded(!expanded)}
-                  className='h-8 w-8'
                 >
                   {expanded ? (
-                    <Minimize2 className='h-4 w-4' />
+                    <Minimize2 className='size-4' />
                   ) : (
-                    <Maximize2 className='h-4 w-4' />
+                    <Maximize2 className='size-4' />
                   )}
-                </RetroButton>
+                </Button>
               </div>
             </div>
           </DialogHeader>
 
           {/* Messages Area */}
-          <div className='flex-1 overflow-y-auto p-4 space-y-4 min-h-0'>
+          <div className='scrollbar-thin min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4'>
             {messages.length === 0 ? (
-              <div className='flex flex-col items-center justify-center h-full text-center text-muted-foreground'>
-                <MessageCircle className='h-12 w-12 mb-4 opacity-20' />
-                <p className='text-sm font-medium'>
-                  Ask anything about your journals
+              <div className='flex h-full flex-col items-center justify-center text-center'>
+                <MessageCircle className='mb-4 size-10 text-muted-foreground/30' />
+                <p className='font-serif text-lg text-foreground/80'>
+                  Your journal remembers everything.
                 </p>
-                <p className='text-xs mt-1'>
-                  Try: &quot;What was my best day?&quot; or &quot;How have I
-                  been feeling lately?&quot;
+                <p className='mt-1.5 max-w-xs text-xs leading-relaxed text-muted-foreground'>
+                  Try “What was my best day this month?” or “How have I been
+                  feeling lately?”
                 </p>
               </div>
             ) : (
@@ -210,24 +214,22 @@ const Question = () => {
                     className={`flex flex-col ${msg.role === 'human' ? 'items-end' : 'items-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] px-3 py-2 text-sm border-2 ${
+                      className={`max-w-[85%] px-4 py-2.5 text-sm leading-relaxed ${
                         msg.role === 'human'
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-muted text-foreground border-foreground/10'
+                          ? 'rounded-2xl rounded-br-md bg-primary text-primary-foreground'
+                          : 'rounded-2xl rounded-bl-md bg-muted text-foreground'
                       }`}
                     >
-                      {/* Render AI message with proper formatting */}
                       {msg.role === 'ai' ? (
                         <div className='whitespace-pre-wrap'>{msg.content}</div>
                       ) : (
                         msg.content
                       )}
                     </div>
-                    {/* Show referenced entries for AI messages */}
                     {msg.role === 'ai' &&
                       msg.referencedEntries &&
                       msg.referencedEntries.length > 0 && (
-                        <div className='mt-2 flex flex-wrap gap-1.5 max-w-[85%]'>
+                        <div className='mt-2 flex max-w-[85%] flex-wrap gap-1.5'>
                           {msg.referencedEntries.map((entry) => (
                             <EntryLink key={entry.id} entry={entry} />
                           ))}
@@ -237,9 +239,9 @@ const Question = () => {
                 ))}
                 {loading && (
                   <div className='flex justify-start'>
-                    <div className='bg-muted border-2 border-foreground/10 px-3 py-2 flex items-center gap-2 text-sm text-muted-foreground'>
+                    <div className='flex items-center gap-2 rounded-2xl rounded-bl-md bg-muted px-4 py-2.5 text-sm text-muted-foreground'>
                       <Spinner />
-                      Thinking...
+                      Reading your journal…
                     </div>
                   </div>
                 )}
@@ -249,24 +251,24 @@ const Question = () => {
           </div>
 
           {/* Input Form */}
-          <div className='p-4 pt-3 border-t-2 border-foreground/10 shrink-0'>
+          <div className='shrink-0 border-t border-border/60 px-5 py-4'>
             <form onSubmit={handleSubmit} className='flex gap-2'>
               <input
                 type='text'
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 disabled={loading}
-                placeholder='Ask about your journal entries...'
-                className='flex-1 h-10 px-3 text-sm border-2 border-foreground/20 bg-background focus:border-primary focus:outline-none disabled:opacity-50'
+                placeholder='Ask about your journal entries…'
+                className='h-10 flex-1 rounded-full border border-input bg-background px-4 text-sm transition-colors placeholder:text-muted-foreground/60 focus:border-ring focus:outline-none disabled:opacity-50'
                 autoFocus
               />
-              <RetroButton
+              <Button
                 type='submit'
                 disabled={loading || !question.trim()}
                 size='icon'
               >
-                <Send className='h-4 w-4' />
-              </RetroButton>
+                <ArrowUp className='size-4' />
+              </Button>
             </form>
           </div>
         </DialogContent>

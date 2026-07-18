@@ -30,7 +30,14 @@ const createNewUser = async () => {
 
 const NewUser = async () => {
   await createNewUser();
-  return <div>...loading</div>;
+  return (
+    <div className='paper-bg flex min-h-screen flex-col items-center justify-center gap-4'>
+      <div className='size-5 animate-spin rounded-full border-2 border-muted-foreground/25 border-t-foreground/70' />
+      <p className='font-serif text-lg text-muted-foreground'>
+        Preparing your journal…
+      </p>
+    </div>
+  );
 };
 
 export default NewUser;

@@ -2,6 +2,7 @@ import { FullMoodInsights } from '@/components/MoodInsights';
 import { getUserFromClerkID } from '@/util/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/util/db';
+import { scoreToColor } from '@/util/color';
 
 // Get all entries for the user (for all-time statistics)
 const getAllEntries = async () => {
@@ -26,6 +27,32 @@ const getAllEntries = async () => {
 
   return data;
 };
+
+const StatTile = ({
+  label,
+  value,
+  valueColor,
+  wide = false,
+}: {
+  label: string;
+  value: string;
+  valueColor?: string;
+  wide?: boolean;
+}) => (
+  <div
+    className={`rounded-2xl border border-border/70 bg-card p-5 shadow-card ${
+      wide ? 'col-span-2' : ''
+    }`}
+  >
+    <p
+      className='truncate font-serif text-3xl font-medium tabular-nums tracking-tight'
+      style={valueColor ? { color: valueColor } : undefined}
+    >
+      {value}
+    </p>
+    <p className='eyebrow mt-1'>{label}</p>
+  </div>
+);
 
 const StatisticsPage = async () => {
   const entries = await getAllEntries();
@@ -67,45 +94,36 @@ const StatisticsPage = async () => {
       : null;
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-8'>
       {/* Page Header */}
-      <div className='space-y-1'>
-        <h1 className='text-2xl font-black tracking-tight uppercase'>
+      <div className='rise rise-1'>
+        <p className='eyebrow'>The numbers behind the feelings</p>
+        <h1 className='mt-1 font-serif text-4xl font-medium tracking-tight'>
           Statistics
         </h1>
-        <p className='text-sm text-muted-foreground'>
-          Your mood trends and insights over time
-        </p>
       </div>
 
       {/* Quick Stats */}
-      <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
-        <div className='border-2 border-foreground/20 bg-card p-4'>
-          <div className='text-2xl font-black'>{totalEntries}</div>
-          <div className='text-xs text-muted-foreground uppercase tracking-wide'>
-            Total Entries
-          </div>
-        </div>
-        <div className='border-2 border-foreground/20 bg-card p-4'>
-          <div className='text-2xl font-black'>
-            {avgMood != null ? (avgMood > 0 ? `+${avgMood}` : avgMood) : '-'}
-          </div>
-          <div className='text-xs text-muted-foreground uppercase tracking-wide'>
-            Avg Mood Score
-          </div>
-        </div>
-        <div className='border-2 border-foreground/20 bg-card p-4 col-span-2'>
-          <div className='text-sm font-bold truncate'>
-            {dateRange ? `${dateRange.from} - ${dateRange.to}` : '-'}
-          </div>
-          <div className='text-xs text-muted-foreground uppercase tracking-wide'>
-            Date Range
-          </div>
-        </div>
+      <div className='rise rise-2 grid grid-cols-2 gap-4 sm:grid-cols-4'>
+        <StatTile label='Total entries' value={String(totalEntries)} />
+        <StatTile
+          label='Avg mood score'
+          value={
+            avgMood != null ? (avgMood > 0 ? `+${avgMood}` : `${avgMood}`) : '–'
+          }
+          valueColor={avgMood != null ? scoreToColor(avgMood) : undefined}
+        />
+        <StatTile
+          label='Writing since'
+          value={dateRange ? dateRange.from : '–'}
+          wide
+        />
       </div>
 
       {/* Full Mood Insights with Timeline (All Time / 30 Days) and Heatmap */}
-      <FullMoodInsights entries={entries} />
+      <div className='rise rise-3'>
+        <FullMoodInsights entries={entries} />
+      </div>
     </div>
   );
 };

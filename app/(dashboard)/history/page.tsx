@@ -1,7 +1,8 @@
 import HistoryChart from '@/components/HistoryChart';
 import { getUserFromClerkID } from '@/util/auth';
 import { prisma } from '@/util/db';
-import { RetroWindow } from '@/components/retro';
+import { Panel } from '@/components/journal';
+import { scoreToColor } from '@/util/color';
 
 const getData = async () => {
   const user = await getUserFromClerkID();
@@ -27,44 +28,55 @@ const HistoryPage = async () => {
   const { analyses, average } = await getData();
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-8'>
       {/* Page Header */}
-      <div className='space-y-1'>
-        <h1 className='text-2xl font-black tracking-tight uppercase'>
+      <div className='rise rise-1'>
+        <p className='eyebrow'>Every entry, one line</p>
+        <h1 className='mt-1 font-serif text-4xl font-medium tracking-tight'>
           History
         </h1>
-        <p className='text-sm text-muted-foreground'>
-          Your mood trends over time
-        </p>
       </div>
 
       {/* Stats */}
-      <div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
-        <RetroWindow title='Entries'>
-          <p className='text-3xl font-black font-mono'>{analyses.length}</p>
-        </RetroWindow>
-        <RetroWindow title='Avg Score'>
-          <p className='text-3xl font-black font-mono'>
+      <div className='rise rise-2 grid grid-cols-2 gap-4 sm:max-w-md'>
+        <div className='rounded-2xl border border-border/70 bg-card p-5 shadow-card'>
+          <p className='font-serif text-3xl font-medium tabular-nums tracking-tight'>
+            {analyses.length}
+          </p>
+          <p className='eyebrow mt-1'>Entries analyzed</p>
+        </div>
+        <div className='rounded-2xl border border-border/70 bg-card p-5 shadow-card'>
+          <p
+            className='font-serif text-3xl font-medium tabular-nums tracking-tight'
+            style={
+              analyses.length > 0
+                ? { color: scoreToColor(average) }
+                : undefined
+            }
+          >
             {average > 0 ? '+' : ''}
             {average}
           </p>
-        </RetroWindow>
+          <p className='eyebrow mt-1'>Average score</p>
+        </div>
       </div>
 
       {/* Chart */}
-      <RetroWindow title='Mood Timeline'>
-        <div className='h-80'>
-          {analyses.length > 0 ? (
-            <HistoryChart data={analyses} />
-          ) : (
-            <div className='h-full flex items-center justify-center'>
-              <p className='text-muted-foreground'>
-                No data yet. Start journaling to see your mood trends.
-              </p>
-            </div>
-          )}
-        </div>
-      </RetroWindow>
+      <div className='rise rise-3'>
+        <Panel eyebrow='All time' title='Sentiment, entry by entry'>
+          <div className='h-80'>
+            {analyses.length > 0 ? (
+              <HistoryChart data={analyses} />
+            ) : (
+              <div className='flex h-full items-center justify-center'>
+                <p className='text-sm text-muted-foreground'>
+                  No data yet. Start journaling to see your mood trends.
+                </p>
+              </div>
+            )}
+          </div>
+        </Panel>
+      </div>
     </div>
   );
 };

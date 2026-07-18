@@ -7,7 +7,7 @@ import { getUserFromClerkID } from '@/util/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/util/db';
 import Link from 'next/link';
-import { RetroWindow } from '@/components/retro';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const DAYS_PER_PAGE = 30;
 
@@ -140,32 +140,28 @@ const PaginationControls = ({
   if (!hasNewer && !hasOlderEntries) return null;
 
   return (
-    <div className='flex items-center justify-between text-xs sm:text-sm text-muted-foreground'>
-      {/* Newer on left */}
+    <div className='flex items-center justify-between text-xs text-muted-foreground'>
       {hasNewer ? (
         <Link
           href={newerPage === 0 ? '/journal' : `/journal?page=${newerPage}`}
-          className='inline-flex items-center gap-1 hover:underline'
+          className='inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium transition-colors hover:bg-accent hover:text-foreground'
         >
-          <span>&larr;</span>
-          <span>Newer 30 days</span>
+          <ArrowLeft className='size-3.5' />
+          Newer 30 days
         </Link>
       ) : (
         <div />
       )}
 
-      <span className='font-medium tracking-tight uppercase'>
-        Page {page + 1}
-      </span>
+      <span className='eyebrow'>Page {page + 1}</span>
 
-      {/* Older on right */}
       {hasOlderEntries ? (
         <Link
           href={`/journal?page=${olderPage}`}
-          className='inline-flex items-center gap-1 hover:underline'
+          className='inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium transition-colors hover:bg-accent hover:text-foreground'
         >
-          <span>Older 30 days</span>
-          <span>&rarr;</span>
+          Older 30 days
+          <ArrowRight className='size-3.5' />
         </Link>
       ) : (
         <div />
@@ -174,76 +170,80 @@ const PaginationControls = ({
   );
 };
 type JournalPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     page?: string;
-  };
+  }>;
 };
 
 const JournalPage = async ({ searchParams }: JournalPageProps) => {
-  const rawPage = Number(searchParams?.page ?? '0');
+  const params = await searchParams;
+  const rawPage = Number(params?.page ?? '0');
   const page = Number.isNaN(rawPage) || rawPage < 0 ? 0 : rawPage;
 
   const { data, timelineEntries, hasOlderEntries } = await getEntries(page);
   const groupedEntries = groupEntriesByDate(data);
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-8'>
       {/* Page Header */}
-      <div className='space-y-1'>
-        <h1 className='text-2xl font-black tracking-tight uppercase'>
-          Journals
-        </h1>
-        <p className='text-sm text-muted-foreground'>
-          Your journal entries and reflections
-        </p>
-      </div>
-
-      {/* Action Bar: Question + New Entry */}
-      <RetroWindow title='Actions' className='overflow-hidden'>
-        <div className='flex items-center gap-3'>
+      <div className='rise rise-1 flex flex-wrap items-end justify-between gap-4'>
+        <div>
+          <p className='eyebrow'>Your journal</p>
+          <h1 className='mt-1 font-serif text-4xl font-medium tracking-tight'>
+            Entries
+          </h1>
+        </div>
+        <div className='flex items-center gap-2.5'>
           <Question />
           <NewEntry />
         </div>
-      </RetroWindow>
+      </div>
 
       {/* Mood Insights - Timeline only (fixed last 30 days data) */}
-      <MoodInsights entries={timelineEntries} />
+      <div className='rise rise-2'>
+        <MoodInsights entries={timelineEntries} />
+      </div>
 
-      {/* Pagination Controls - Under Mood Insights */}
-      <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
+      <div className='rise rise-3 space-y-8'>
+        <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
 
-      {/* Onboarding when no entries */}
-      {groupedEntries.length === 0 && <Onboarding />}
-
-      {/* Entries List - Grouped by Day */}
-      <div className='space-y-4'>
+        {/* Entries List - Grouped by Day */}
         {groupedEntries.length === 0 ? (
-          <RetroWindow title='No Entries'>
-            <p className='text-muted-foreground text-center py-6 text-sm'>
-              Your entries will appear here once you create one.
-            </p>
-          </RetroWindow>
+          page === 0 ? (
+            <Onboarding />
+          ) : (
+            <section className='rounded-2xl border border-dashed border-border bg-card/60 px-6 py-12 text-center'>
+              <p className='text-sm text-muted-foreground'>
+                No entries in this period.
+              </p>
+            </section>
+          )
         ) : (
           groupedEntries.map(([dateKey, entries]) => (
-            <RetroWindow key={dateKey} title={dateKey}>
-              <div className='divide-y-2 divide-foreground/5'>
+            <section key={dateKey} className='space-y-2.5'>
+              <div className='flex items-center gap-4 px-1'>
+                <h2 className='shrink-0 font-serif text-base font-medium text-foreground/90'>
+                  {dateKey}
+                </h2>
+                <div className='h-px flex-1 bg-border/70' />
+              </div>
+              <div className='divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card'>
                 {entries.map((entry) => (
                   <Link
                     key={entry.id}
                     href={`/journal/${entry.id}`}
-                    className='block no-underline'
+                    className='block'
                   >
                     <EntryCard entry={entry} />
                   </Link>
                 ))}
               </div>
-            </RetroWindow>
+            </section>
           ))
         )}
-      </div>
 
-      {/* Pagination Controls - Bottom */}
-      <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
+        <PaginationControls page={page} hasOlderEntries={hasOlderEntries} />
+      </div>
     </div>
   );
 };

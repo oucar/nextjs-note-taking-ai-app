@@ -74,8 +74,11 @@ export const analyzeEntry = async (entry: { content: string }) => {
     temperature: 0,
   });
 
-  const structured = model.withStructuredOutput(analysisSchema);
-  const result = await structured.invoke(input);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const structured = model.withStructuredOutput(analysisSchema as any);
+  const result = (await structured.invoke(input)) as z.infer<
+    typeof analysisSchema
+  >;
 
   return {
     ...result,
@@ -195,7 +198,8 @@ export const qa = async (
   }));
 
   const llm = new ChatOpenAI({ model: 'gpt-4o-mini', temperature: 0 });
-  const structuredLlm = llm.withStructuredOutput(qaResponseSchema);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const structuredLlm = llm.withStructuredOutput(qaResponseSchema as any);
 
   const messages = [
     new SystemMessage(

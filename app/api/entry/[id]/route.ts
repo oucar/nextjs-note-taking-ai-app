@@ -4,13 +4,17 @@ import { getUserFromClerkID } from '@/util/auth';
 import { prisma } from '@/util/db';
 import { NextResponse } from 'next/server';
 
-export const DELETE = async (request: Request, { params }) => {
+export const DELETE = async (
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  const { id } = await params;
   const user = await getUserFromClerkID();
 
   await prisma.journalEntry.delete({
     where: {
       userId_id: {
-        id: params.id,
+        id,
         userId: user.id,
       },
     },
@@ -18,17 +22,21 @@ export const DELETE = async (request: Request, { params }) => {
 
   update(['/journal']);
 
-  return NextResponse.json({ data: { id: params.id } });
+  return NextResponse.json({ data: { id } });
 };
 
-export const PATCH = async (request: Request, { params }) => {
+export const PATCH = async (
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  const { id } = await params;
   const { updates } = await request.json();
   const user = await getUserFromClerkID();
 
   const entry = await prisma.journalEntry.update({
     where: {
       userId_id: {
-        id: params.id,
+        id,
         userId: user.id,
       },
     },

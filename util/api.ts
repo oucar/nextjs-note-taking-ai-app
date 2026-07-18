@@ -1,8 +1,9 @@
-const createURL = (path) => window.location.origin + path;
+const createURL = (path: string) => window.location.origin + path;
 
-export const fetcher = (...args) => fetch(...args).then((res) => res.json());
+export const fetcher = (...args: Parameters<typeof fetch>) =>
+  fetch(...args).then((res) => res.json());
 
-export const deleteEntry = async (id) => {
+export const deleteEntry = async (id: string) => {
   const res = await fetch(
     new Request(createURL(`/api/entry/${id}`), {
       method: 'DELETE',
@@ -31,7 +32,10 @@ export const newEntry = async () => {
   }
 };
 
-export const updateEntry = async (id, updates) => {
+export const updateEntry = async (
+  id: string,
+  updates: { content: string }
+) => {
   const res = await fetch(
     new Request(createURL(`/api/entry/${id}`), {
       method: 'PATCH',
@@ -46,7 +50,10 @@ export const updateEntry = async (id, updates) => {
   }
 };
 
-export const askQuestion = async (question, history: Array<{ role: string; content: string }> = []) => {
+export const askQuestion = async (
+  question: string,
+  history: Array<{ role: string; content: string }> = []
+) => {
   const res = await fetch(
     new Request(createURL(`/api/question`), {
       method: 'POST',

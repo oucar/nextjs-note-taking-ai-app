@@ -5,33 +5,39 @@ import { useAutosave } from 'react-autosave';
 import Spinner from './Spinner';
 import { useRouter } from 'next/navigation';
 import { scoreToColor } from '@/util/color';
-import { RetroWindow, RetroButton, RetroBadge } from '@/components/retro';
-import { ArrowLeft, Pencil, Eye } from 'lucide-react';
+import { Panel, MoodBadge } from '@/components/journal';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Pencil, Eye, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
-const SentimentBar = ({ score }: { score: number }) => {
-  // Map -10..10 to 0..100%
-  const pct = ((score + 10) / 20) * 100;
+const SentimentMeter = ({ score }: { score: number }) => {
   const color = scoreToColor(score);
+  const magnitude = Math.min(Math.abs(score), 10) / 10; // 0..1
+  const half = magnitude * 50; // % of track, from center
 
   return (
     <div className='space-y-2'>
-      <div className='flex items-center justify-between'>
-        <span className='text-xs font-bold uppercase tracking-wide'>
-          Sentiment
-        </span>
-        <span className='text-sm font-bold font-mono' style={{ color }}>
+      <div className='flex items-baseline justify-between'>
+        <span className='eyebrow'>Sentiment</span>
+        <span className='text-sm font-semibold tabular-nums' style={{ color }}>
           {score > 0 ? '+' : ''}
-          {score}/10
+          {score}
         </span>
       </div>
-      <div className='w-full h-4 bg-background border-2 border-foreground/20 bevel-inset overflow-hidden'>
+      {/* Diverging meter: fill grows from the neutral center */}
+      <div className='relative h-2 w-full overflow-hidden rounded-full bg-muted'>
         <div
-          className='h-full transition-all duration-500'
-          style={{ width: `${pct}%`, background: color }}
+          className='absolute top-0 h-full rounded-full transition-all duration-500'
+          style={{
+            backgroundColor: color,
+            left: score < 0 ? `${50 - half}%` : '50%',
+            width: `${half}%`,
+          }}
         />
+        <div className='absolute left-1/2 top-0 h-full w-px bg-border' />
       </div>
-      <div className='flex justify-between text-[10px] text-muted-foreground font-mono'>
+      <div className='flex justify-between text-[10px] tabular-nums text-muted-foreground'>
         <span>-10</span>
         <span>0</span>
         <span>+10</span>
@@ -40,7 +46,20 @@ const SentimentBar = ({ score }: { score: number }) => {
   );
 };
 
-const Editor = ({ entry }) => {
+type EditorEntry = {
+  id: string;
+  content: string;
+  createdAt: string | Date;
+  analysis?: {
+    subject?: string | null;
+    mood?: string | null;
+    summary?: string | null;
+    negative?: boolean | null;
+    sentimentScore: number;
+  } | null;
+};
+
+const Editor = ({ entry }: { entry: EditorEntry }) => {
   const [text, setText] = useState(entry.content);
   const [currentEntry, setEntry] = useState(entry);
   const [isSaving, setIsSaving] = useState(false);
@@ -48,9 +67,7 @@ const Editor = ({ entry }) => {
   const router = useRouter();
 
   const analysis = currentEntry.analysis;
-  const color = analysis
-    ? scoreToColor(analysis.sentimentScore)
-    : (analysis?.color ?? '#6366f1');
+  const color = analysis ? scoreToColor(analysis.sentimentScore) : undefined;
 
   const handleDelete = async () => {
     await deleteEntry(entry.id);
@@ -85,146 +102,140 @@ const Editor = ({ entry }) => {
   });
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-5'>
       {/* Back navigation */}
       <Link
         href='/journal'
-        className='inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors no-underline'
+        className='inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'
       >
-        <ArrowLeft className='h-4 w-4' />
-        <span className='font-bold uppercase tracking-wide'>
-          Back to Journals
-        </span>
+        <ArrowLeft className='size-4' />
+        Back to journal
       </Link>
 
       {/* Two-column layout */}
-      <div className='grid lg:grid-cols-[1fr_320px] gap-4'>
-        {/* Left: Entry Content */}
-        <RetroWindow
-          title={analysis?.subject || dateTitle}
-          actions={
+      <div className='grid items-start gap-5 lg:grid-cols-[1fr_320px]'>
+        {/* Left: Writing surface */}
+        <section className='rounded-2xl border border-border/70 bg-card shadow-card'>
+          <header className='flex flex-wrap items-center justify-between gap-3 border-b border-border/50 px-6 py-4 sm:px-8'>
+            <div className='min-w-0'>
+              <p className='eyebrow'>
+                {dateTitle} · {timeTitle}
+              </p>
+              <h1 className='mt-0.5 truncate font-serif text-2xl font-medium tracking-tight'>
+                {analysis?.subject || 'Untitled entry'}
+              </h1>
+            </div>
+
             <div className='flex items-center gap-3'>
-              {/* Edit Mode Toggle */}
-              <RetroButton
-                variant={isEditMode ? 'default' : 'ghost'}
+              {isEditMode && (
+                <span className='flex items-center gap-1.5 text-xs text-muted-foreground'>
+                  {isSaving ? (
+                    <>
+                      <Spinner />
+                      Saving…
+                    </>
+                  ) : (
+                    <>
+                      <span className='size-1.5 rounded-full bg-[#4d8544]' />
+                      Saved
+                    </>
+                  )}
+                </span>
+              )}
+              <Button
+                variant={isEditMode ? 'secondary' : 'outline'}
                 size='sm'
                 onClick={() => setIsEditMode(!isEditMode)}
+                className='gap-1.5'
               >
                 {isEditMode ? (
                   <>
-                    <Eye className='h-3 w-3' />
-                    <span>View</span>
+                    <Eye className='size-3.5' />
+                    Read
                   </>
                 ) : (
                   <>
-                    <Pencil className='h-3 w-3' />
-                    <span>Edit</span>
+                    <Pencil className='size-3.5' />
+                    Write
                   </>
                 )}
-              </RetroButton>
-
-              {/* Save Status */}
-              {isEditMode && (
-                <>
-                  {isSaving ? (
-                    <div className='flex items-center gap-2 text-xs'>
-                      <Spinner />
-                      <span>Saving...</span>
-                    </div>
-                  ) : (
-                    <div className='flex items-center gap-2 text-xs'>
-                      <span className='inline-block w-2 h-2 bg-green-500' />
-                      <span>Saved</span>
-                    </div>
-                  )}
-                </>
-              )}
+              </Button>
             </div>
-          }
-          className='min-h-[400px] flex flex-col'
-          contentClassName='flex-1 p-0'
-        >
+          </header>
+
           {isEditMode ? (
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              className='w-full h-full min-h-[350px] resize-none p-4 text-base leading-relaxed bg-background border-0 focus:outline-none'
-              placeholder='Write your thoughts...'
+              className='entry-prose min-h-[420px] w-full resize-none bg-transparent px-6 py-6 text-foreground/95 placeholder:text-muted-foreground/60 focus:outline-none sm:px-8'
+              placeholder='Write your thoughts…'
+              autoFocus
             />
           ) : (
-            <div className='w-full h-full min-h-[350px] p-4 text-base leading-relaxed bg-background whitespace-pre-wrap'>
-              {text}
+            <div
+              className={cn(
+                'entry-prose min-h-[420px] whitespace-pre-wrap px-6 py-6 sm:px-8',
+                text
+                  ? 'text-foreground/95'
+                  : 'italic text-muted-foreground/70'
+              )}
+            >
+              {text || 'Nothing here yet — switch to Write and let it out.'}
             </div>
           )}
-        </RetroWindow>
+        </section>
 
         {/* Right: Analysis Panel */}
-        <RetroWindow title='Analysis' titleBarColor={color} className='h-fit'>
-          <div className='space-y-5'>
-            {/* Sentiment Bar */}
-            {analysis && <SentimentBar score={analysis.sentimentScore} />}
+        <Panel title='Analysis' accentColor={color} className='lg:sticky lg:top-24'>
+          <div className='space-y-6'>
+            {analysis ? (
+              <>
+                <SentimentMeter score={analysis.sentimentScore} />
 
-            {/* Analysis Fields */}
-            <div className='space-y-4'>
-              <div className='space-y-1'>
-                <p className='text-xs font-bold uppercase tracking-wide text-muted-foreground'>
-                  Subject
-                </p>
-                <p className='text-sm'>{analysis?.subject || '—'}</p>
-              </div>
+                <div className='space-y-5'>
+                  <div className='space-y-1'>
+                    <p className='eyebrow'>Mood</p>
+                    {analysis.mood ? (
+                      <MoodBadge color={color}>{analysis.mood}</MoodBadge>
+                    ) : (
+                      <p className='text-sm text-muted-foreground'>—</p>
+                    )}
+                  </div>
 
-              <div className='space-y-1'>
-                <p className='text-xs font-bold uppercase tracking-wide text-muted-foreground'>
-                  Mood
-                </p>
-                {analysis?.mood ? (
-                  <RetroBadge variant='mood'>{analysis.mood}</RetroBadge>
-                ) : (
-                  <p className='text-sm'>—</p>
-                )}
-              </div>
+                  <div className='space-y-1'>
+                    <p className='eyebrow'>Summary</p>
+                    <p className='font-serif text-[15px] italic leading-relaxed text-foreground/85'>
+                      {analysis.summary ? `“${analysis.summary}”` : '—'}
+                    </p>
+                  </div>
 
-              <div className='space-y-1'>
-                <p className='text-xs font-bold uppercase tracking-wide text-muted-foreground'>
-                  Negative Content
-                </p>
-                <RetroBadge
-                  variant={analysis?.negative ? 'default' : 'secondary'}
-                >
-                  {analysis?.negative ? 'Yes' : 'No'}
-                </RetroBadge>
-              </div>
+                  {analysis.negative && (
+                    <div className='rounded-xl border border-[#b2492c]/25 bg-[#b2492c]/8 px-3.5 py-2.5 text-xs leading-relaxed text-muted-foreground'>
+                      This entry leans heavy. Be kind to yourself today.
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p className='text-sm leading-relaxed text-muted-foreground'>
+                Write a few sentences and Mood will read between the lines —
+                sentiment, mood, and a short summary appear here.
+              </p>
+            )}
 
-              <div className='space-y-1'>
-                <p className='text-xs font-bold uppercase tracking-wide text-muted-foreground'>
-                  Summary
-                </p>
-                <p className='text-sm text-muted-foreground'>
-                  {analysis?.summary || '—'}
-                </p>
-              </div>
-
-              <div className='space-y-1'>
-                <p className='text-xs font-bold uppercase tracking-wide text-muted-foreground'>
-                  Created
-                </p>
-                <p className='text-sm font-mono'>{timeTitle}</p>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className='border-t-2 border-foreground/10 pt-4'>
-              <RetroButton
-                variant='destructive'
+            <div className='border-t border-border/60 pt-4'>
+              <Button
+                variant='ghost'
                 size='sm'
                 onClick={handleDelete}
-                className='w-full'
+                className='w-full gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive'
               >
-                Delete Entry
-              </RetroButton>
+                <Trash2 className='size-3.5' />
+                Delete entry
+              </Button>
             </div>
           </div>
-        </RetroWindow>
+        </Panel>
       </div>
     </div>
   );

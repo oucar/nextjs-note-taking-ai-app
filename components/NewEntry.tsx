@@ -2,22 +2,31 @@
 
 import { newEntry } from '@/util/api';
 import { useRouter } from 'next/navigation';
-import { RetroButton } from '@/components/retro';
-import { PlusCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { PenLine } from 'lucide-react';
+import Spinner from './Spinner';
 
 const NewEntry = () => {
   const router = useRouter();
+  const [creating, setCreating] = useState(false);
 
   const handleOnClick = async () => {
-    const { data } = await newEntry();
-    router.push(`/journal/${data.id}`);
+    if (creating) return;
+    setCreating(true);
+    try {
+      const { data } = await newEntry();
+      router.push(`/journal/${data.id}`);
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
-    <RetroButton onClick={handleOnClick} className='gap-2'>
-      <PlusCircle className='h-4 w-4' />
-      New Entry
-    </RetroButton>
+    <Button onClick={handleOnClick} disabled={creating} className='gap-2'>
+      {creating ? <Spinner /> : <PenLine className='size-4' />}
+      New entry
+    </Button>
   );
 };
 

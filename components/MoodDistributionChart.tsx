@@ -14,7 +14,7 @@ import {
   Legend,
 } from 'recharts';
 import { scoreToColor } from '@/util/color';
-import { cn } from '@/lib/utils';
+import { Segmented } from '@/components/journal';
 
 // When there are more than this many moods, we show top N (bar chart)
 const MAX_BARS_WHEN_MANY = 40;
@@ -69,7 +69,7 @@ function processMoodDistribution(entries: EntryWithAnalysis[]): {
   });
 
   const sorted = Object.entries(byKey)
-    .map(([_, v]) => ({
+    .map(([, v]) => ({
       mood: v.displayLabel,
       count: v.count,
       avgScore:
@@ -103,16 +103,19 @@ const CustomTooltip = ({
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className='bg-card border-2 border-foreground/20 shadow-[2px_2px_0_rgba(0,0,0,0.15)] p-3 min-w-[140px]'>
-      <p className='text-sm font-bold uppercase truncate max-w-[200px]'>
+    <div className='min-w-[140px] rounded-xl border border-border/70 bg-popover p-3 shadow-raised'>
+      <p className='max-w-[200px] truncate text-sm font-medium lowercase'>
         {d.mood}
       </p>
-      <p className='text-xs font-mono text-muted-foreground'>
+      <p className='mt-0.5 text-xs text-muted-foreground'>
         {d.count} {d.count === 1 ? 'entry' : 'entries'}
       </p>
-      <p className='text-xs font-mono' style={{ color: d.color }}>
-        Avg score: {d.avgScore > 0 ? '+' : ''}
-        {d.avgScore}
+      <p className='text-xs text-muted-foreground'>
+        Avg score:{' '}
+        <span className='font-semibold' style={{ color: d.color }}>
+          {d.avgScore > 0 ? '+' : ''}
+          {d.avgScore}
+        </span>
       </p>
     </div>
   );
@@ -141,10 +144,10 @@ export default function MoodDistributionChart({
   if (data.length === 0) {
     return (
       <div className='space-y-4'>
-        <h3 className='text-sm font-bold uppercase tracking-wide'>
-          Mood Distribution
+        <h3 className='font-serif text-base font-medium tracking-tight'>
+          Mood distribution
         </h3>
-        <div className='h-[280px] flex items-center justify-center text-muted-foreground text-sm'>
+        <div className='flex h-[280px] items-center justify-center text-sm text-muted-foreground'>
           No mood data yet. Add entries to see distribution.
         </div>
       </div>
@@ -155,8 +158,8 @@ export default function MoodDistributionChart({
     <div className='space-y-4'>
       <div className='flex items-start justify-between gap-4'>
         <div>
-          <h3 className='text-sm font-bold uppercase tracking-wide'>
-            Mood Distribution
+          <h3 className='font-serif text-base font-medium tracking-tight'>
+            Mood distribution
           </h3>
           {viewMode === 'bar' ? (
             showingTopN != null ? (
@@ -179,32 +182,14 @@ export default function MoodDistributionChart({
             </p>
           )}
         </div>
-        <div className='flex border-2 border-foreground/20 shrink-0'>
-          <button
-            type='button'
-            onClick={() => setViewMode('donut')}
-            className={cn(
-              'px-3 py-1 text-xs font-bold uppercase transition-colors',
-              viewMode === 'donut'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-accent'
-            )}
-          >
-            Donut
-          </button>
-          <button
-            type='button'
-            onClick={() => setViewMode('bar')}
-            className={cn(
-              'px-3 py-1 text-xs font-bold uppercase transition-colors border-l-2 border-foreground/20',
-              viewMode === 'bar'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-accent'
-            )}
-          >
-            Bar
-          </button>
-        </div>
+        <Segmented
+          value={viewMode}
+          onChange={setViewMode}
+          options={[
+            { value: 'donut', label: 'Donut' },
+            { value: 'bar', label: 'Bar' },
+          ]}
+        />
       </div>
       <div className='h-[280px] w-full'>
         <ResponsiveContainer width='100%' height='100%'>
@@ -218,9 +203,10 @@ export default function MoodDistributionChart({
                 cy='50%'
                 innerRadius='55%'
                 outerRadius='85%'
-                paddingAngle={1}
+                paddingAngle={2}
+                cornerRadius={3}
                 stroke='var(--card)'
-                strokeWidth={1.5}
+                strokeWidth={2}
               >
                 {donutData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -231,7 +217,9 @@ export default function MoodDistributionChart({
                 layout='vertical'
                 align='right'
                 verticalAlign='middle'
-                wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }}
+                iconType='circle'
+                iconSize={8}
+                wrapperStyle={{ fontSize: '11px' }}
                 formatter={(value) =>
                   value.length > 14 ? value.slice(0, 12) + '…' : value
                 }
@@ -244,9 +232,10 @@ export default function MoodDistributionChart({
             >
               <XAxis
                 dataKey='mood'
-                tick={{ fontSize: 10, fontFamily: 'monospace' }}
-                stroke='var(--muted-foreground)'
+                tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+                stroke='var(--border)'
                 tickLine={false}
+                axisLine={{ stroke: 'var(--border)' }}
                 angle={-35}
                 textAnchor='end'
                 interval={0}
@@ -256,13 +245,14 @@ export default function MoodDistributionChart({
               />
               <YAxis
                 type='number'
-                tick={{ fontSize: 10, fontFamily: 'monospace' }}
-                stroke='var(--muted-foreground)'
+                tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+                stroke='var(--border)'
                 tickLine={false}
+                axisLine={false}
                 allowDecimals={false}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey='count' radius={[2, 2, 0, 0]} maxBarSize={48}>
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--accent)' }} />
+              <Bar dataKey='count' radius={[4, 4, 0, 0]} maxBarSize={40}>
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}

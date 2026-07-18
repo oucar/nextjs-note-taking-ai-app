@@ -3,7 +3,7 @@ import { getUserFromClerkID } from '@/util/auth';
 import { prisma } from '@/util/db';
 import { NextResponse } from 'next/server';
 
-export const POST = async (request) => {
+export const POST = async (request: Request) => {
   const { question, history = [] } = await request.json();
   const user = await getUserFromClerkID();
   const entries = await prisma.journalEntry.findMany({

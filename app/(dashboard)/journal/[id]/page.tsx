@@ -1,9 +1,9 @@
 import Editor from '@/components/Editor';
 import { getUserFromClerkID } from '@/util/auth';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/util/db';
 
-const getEntry = async (id) => {
+const getEntry = async (id: string) => {
   let user;
   try {
     user = await getUserFromClerkID();
@@ -25,8 +25,15 @@ const getEntry = async (id) => {
   return entry;
 };
 
-const JournalEditorPage = async ({ params }) => {
-  const entry = await getEntry(params.id);
+const JournalEditorPage = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const { id } = await params;
+  const entry = await getEntry(id);
+
+  if (!entry) notFound();
 
   return <Editor entry={entry} />;
 };

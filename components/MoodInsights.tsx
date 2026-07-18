@@ -9,14 +9,15 @@ import {
   YAxis,
   Tooltip,
   ReferenceLine,
-  Legend,
 } from 'recharts';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { RetroWindow } from '@/components/retro';
+import { Panel, Segmented } from '@/components/journal';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
 import { scoreToColor } from '@/util/color';
 import { cn } from '@/lib/utils';
 import MoodDistributionChart from '@/components/MoodDistributionChart';
@@ -206,6 +207,9 @@ const processHeatmapData = (entries: AnalysisData[]): MonthHeatmapData[] => {
   return months;
 };
 
+// Shared axis styling
+const axisTick = { fontSize: 11, fill: 'var(--muted-foreground)' };
+
 // Custom Tooltip for Timeline
 type TooltipPayloadItem = {
   value: number | null;
@@ -225,10 +229,8 @@ const TimelineTooltip = ({
   const dataPoint = payload[0]?.payload as TimelineDataPoint;
 
   return (
-    <div className='bg-card border-2 border-foreground/20 shadow-[2px_2px_0_rgba(0,0,0,0.15)] p-3 min-w-[160px]'>
-      <p className='text-xs font-mono text-muted-foreground mb-2'>
-        {dataPoint.label}
-      </p>
+    <div className='min-w-[160px] rounded-xl border border-border/70 bg-popover p-3 shadow-raised'>
+      <p className='eyebrow mb-2'>{dataPoint.label}</p>
       {payload.map((p, idx: number) => {
         if (p.value == null) return null;
         const color = scoreToColor(p.value);
@@ -236,22 +238,19 @@ const TimelineTooltip = ({
         return (
           <div key={idx} className='flex items-center justify-between gap-4'>
             <div className='flex items-center gap-2'>
-              <div
-                className='w-3 h-3 border border-foreground/30'
+              <span
+                className='size-2 rounded-full'
                 style={{
                   backgroundColor: isPrevious
                     ? 'var(--muted-foreground)'
                     : color,
                 }}
               />
-              <span className='text-xs font-mono'>
+              <span className='text-xs text-muted-foreground'>
                 {isPrevious ? 'Previous' : 'Current'}
               </span>
             </div>
-            <span
-              className='text-sm font-bold'
-              style={{ color: isPrevious ? 'var(--muted-foreground)' : color }}
-            >
+            <span className='text-sm font-semibold tabular-nums text-foreground'>
               {p.value > 0 ? '+' : ''}
               {p.value}
             </span>
@@ -275,13 +274,12 @@ const CurrentDot = (props: DotProps) => {
     return null;
   const color = scoreToColor(payload.current);
   return (
-    <rect
-      x={cx - 4}
-      y={cy - 4}
-      width={8}
-      height={8}
+    <circle
+      cx={cx}
+      cy={cy}
+      r={4}
       fill={color}
-      stroke='var(--foreground)'
+      stroke='var(--card)'
       strokeWidth={1.5}
     />
   );
@@ -296,13 +294,29 @@ const PreviousDot = (props: DotProps) => {
     <circle
       cx={cx}
       cy={cy}
-      r={4}
-      fill='var(--muted)'
-      stroke='var(--muted-foreground)'
+      r={3}
+      fill='var(--muted-foreground)'
+      stroke='var(--card)'
       strokeWidth={1.5}
     />
   );
 };
+
+const PeriodLegend = ({ periodLabel }: { periodLabel: string }) => (
+  <div className='flex items-center gap-5 text-xs text-muted-foreground'>
+    <div className='flex items-center gap-1.5'>
+      <span className='inline-block h-0.5 w-6 rounded-full bg-primary' />
+      <span>Last {periodLabel}</span>
+    </div>
+    <div className='flex items-center gap-1.5'>
+      <span
+        className='inline-block w-6 border-t-2 border-dashed border-muted-foreground'
+        aria-hidden
+      />
+      <span>Previous {periodLabel}</span>
+    </div>
+  </div>
+);
 
 // Timeline Component
 const MoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
@@ -316,38 +330,20 @@ const MoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
 
   return (
     <div className='space-y-4'>
-      {/* Mode Toggle */}
-      <div className='flex items-center justify-between'>
-        <h3 className='text-sm font-bold uppercase tracking-wide'>
-          Mood Timeline
+      <div className='flex items-center justify-between gap-3'>
+        <h3 className='font-serif text-base font-medium tracking-tight'>
+          Mood timeline
         </h3>
-        <div className='flex border-2 border-foreground/20'>
-          <button
-            onClick={() => setMode('7days')}
-            className={cn(
-              'px-3 py-1 text-xs font-bold uppercase transition-colors',
-              mode === '7days'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-accent'
-            )}
-          >
-            7 Days
-          </button>
-          <button
-            onClick={() => setMode('30days')}
-            className={cn(
-              'px-3 py-1 text-xs font-bold uppercase transition-colors border-l-2 border-foreground/20',
-              mode === '30days'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-accent'
-            )}
-          >
-            30 Days
-          </button>
-        </div>
+        <Segmented
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: '7days', label: '7 days' },
+            { value: '30days', label: '30 days' },
+          ]}
+        />
       </div>
 
-      {/* Chart */}
       {hasData ? (
         <div className='h-[200px] w-full'>
           <ResponsiveContainer width='100%' height='100%'>
@@ -357,16 +353,18 @@ const MoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
             >
               <XAxis
                 dataKey='label'
-                tick={{ fontSize: 10, fontFamily: 'monospace' }}
-                stroke='var(--muted-foreground)'
+                tick={axisTick}
+                stroke='var(--border)'
                 tickLine={false}
+                axisLine={{ stroke: 'var(--border)' }}
                 interval={mode === '30days' ? 4 : 0}
               />
               <YAxis
                 domain={[-10, 10]}
-                tick={{ fontSize: 10, fontFamily: 'monospace' }}
-                stroke='var(--muted-foreground)'
+                tick={axisTick}
+                stroke='var(--border)'
                 tickLine={false}
+                axisLine={false}
                 ticks={[-10, -5, 0, 5, 10]}
               />
               <ReferenceLine
@@ -374,25 +372,19 @@ const MoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
                 stroke='var(--border)'
                 strokeDasharray='3 3'
               />
-              <Tooltip content={<TimelineTooltip />} />
-              <Legend
-                verticalAlign='top'
-                align='right'
-                iconType='square'
-                wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }}
-              />
+              <Tooltip content={<TimelineTooltip />} cursor={{ stroke: 'var(--border)' }} />
               <Line
-                name={`Previous ${mode === '7days' ? '7' : '30'} days`}
+                name='Previous period'
                 type='monotone'
                 dataKey='previous'
                 stroke='var(--muted-foreground)'
-                strokeWidth={2}
+                strokeWidth={1.5}
                 strokeDasharray='4 4'
                 dot={<PreviousDot />}
                 connectNulls
               />
               <Line
-                name={`Last ${mode === '7days' ? '7' : '30'} days`}
+                name='Current period'
                 type='monotone'
                 dataKey='current'
                 stroke='var(--primary)'
@@ -404,25 +396,12 @@ const MoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className='h-[200px] flex items-center justify-center text-muted-foreground text-sm'>
+        <div className='flex h-[200px] items-center justify-center text-sm text-muted-foreground'>
           No mood data available for this period
         </div>
       )}
 
-      {/* Legend explanation */}
-      <div className='flex items-center gap-4 text-xs text-muted-foreground'>
-        <div className='flex items-center gap-1'>
-          <div className='w-8 h-0.5 bg-primary' />
-          <span>Current period</span>
-        </div>
-        <div className='flex items-center gap-1'>
-          <div
-            className='w-8 h-0.5 bg-muted-foreground'
-            style={{ borderTop: '2px dashed var(--muted-foreground)' }}
-          />
-          <span>Previous period</span>
-        </div>
-      </div>
+      <PeriodLegend periodLabel={mode === '7days' ? '7 days' : '30 days'} />
     </div>
   );
 };
@@ -437,12 +416,9 @@ const HeatmapCell = ({
   day: number;
   count: number;
 }) => {
-  const bgColor = score != null ? scoreToColor(score) : 'var(--muted)';
-  const opacity = score != null ? 1 : 0.3;
-
   return (
     <div
-      className='relative group cursor-default'
+      className='group relative cursor-default'
       title={
         score != null
           ? `Day ${day}: ${score > 0 ? '+' : ''}${score} (${count} entries)`
@@ -450,8 +426,12 @@ const HeatmapCell = ({
       }
     >
       <div
-        className='w-3 h-3 border border-foreground/10'
-        style={{ backgroundColor: bgColor, opacity }}
+        className='size-3 rounded-[3px]'
+        style={
+          score != null
+            ? { backgroundColor: scoreToColor(score) }
+            : { backgroundColor: 'var(--muted)' }
+        }
       />
     </div>
   );
@@ -466,19 +446,19 @@ const MoodHeatmap = ({ entries }: { entries: AnalysisData[] }) => {
 
   return (
     <div className='space-y-4'>
-      <h3 className='text-sm font-bold uppercase tracking-wide'>
-        Mood Heatmap (Last 12 Months)
+      <h3 className='font-serif text-base font-medium tracking-tight'>
+        A year of moods
       </h3>
 
       {/* Heatmap Grid */}
       <div className='overflow-x-auto'>
         <div className='min-w-[600px]'>
           {/* Month labels */}
-          <div className='flex gap-1 mb-1'>
+          <div className='mb-1.5 flex gap-1'>
             <div className='w-10 shrink-0' /> {/* Spacer for day labels */}
             {heatmapData.map((month, idx) => (
               <div key={idx} className='flex-1 text-center'>
-                <span className='text-[10px] font-mono text-muted-foreground uppercase'>
+                <span className='text-[10px] font-medium uppercase tracking-wide text-muted-foreground'>
                   {month.month}
                 </span>
               </div>
@@ -487,11 +467,11 @@ const MoodHeatmap = ({ entries }: { entries: AnalysisData[] }) => {
 
           {/* Heatmap rows (days 1-31) */}
           {Array.from({ length: 31 }, (_, dayIndex) => (
-            <div key={dayIndex} className='flex gap-1 items-center'>
+            <div key={dayIndex} className='flex items-center gap-1 pb-px'>
               {/* Day label (show every 5th day) */}
-              <div className='w-10 shrink-0 text-right pr-2'>
+              <div className='w-10 shrink-0 pr-2 text-right'>
                 {(dayIndex + 1) % 5 === 1 && (
-                  <span className='text-[10px] font-mono text-muted-foreground'>
+                  <span className='text-[10px] tabular-nums text-muted-foreground'>
                     {dayIndex + 1}
                   </span>
                 )}
@@ -503,13 +483,13 @@ const MoodHeatmap = ({ entries }: { entries: AnalysisData[] }) => {
                 if (!dayData) {
                   // Day doesn't exist in this month
                   return (
-                    <div key={monthIdx} className='flex-1 flex justify-center'>
-                      <div className='w-3 h-3' />
+                    <div key={monthIdx} className='flex flex-1 justify-center'>
+                      <div className='size-3' />
                     </div>
                   );
                 }
                 return (
-                  <div key={monthIdx} className='flex-1 flex justify-center'>
+                  <div key={monthIdx} className='flex flex-1 justify-center'>
                     <HeatmapCell
                       score={dayData.score}
                       day={dayData.day}
@@ -520,49 +500,51 @@ const MoodHeatmap = ({ entries }: { entries: AnalysisData[] }) => {
               })}
             </div>
           ))}
-        </div>
-      </div>
 
-      {/* Monthly averages */}
-      <div className='flex gap-1 items-center mt-2'>
-        <div className='w-10 shrink-0 text-right pr-2'>
-          <span className='text-[10px] font-mono text-muted-foreground'>
-            AVG
-          </span>
-        </div>
-        {heatmapData.map((month, idx) => (
-          <div key={idx} className='flex-1 flex justify-center'>
-            {month.avgScore != null ? (
-              <span
-                className='text-[10px] font-bold font-mono'
-                style={{ color: scoreToColor(month.avgScore) }}
-              >
-                {month.avgScore > 0 ? '+' : ''}
-                {month.avgScore}
-              </span>
-            ) : (
-              <span className='text-[10px] text-muted-foreground'>-</span>
-            )}
+          {/* Monthly averages */}
+          <div className='mt-2 flex items-center gap-1 border-t border-border/50 pt-2'>
+            <div className='w-10 shrink-0 pr-2 text-right'>
+              <span className='eyebrow text-[10px]'>Avg</span>
+            </div>
+            {heatmapData.map((month, idx) => (
+              <div key={idx} className='flex flex-1 justify-center'>
+                {month.avgScore != null ? (
+                  <span
+                    className='text-[10px] font-semibold tabular-nums'
+                    style={{ color: scoreToColor(month.avgScore) }}
+                  >
+                    {month.avgScore > 0 ? '+' : ''}
+                    {month.avgScore}
+                  </span>
+                ) : (
+                  <span className='text-[10px] text-muted-foreground'>–</span>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
 
       {/* Color scale legend */}
-      <div className='flex items-center justify-center gap-2 mt-4'>
-        <span className='text-[10px] font-mono text-muted-foreground'>-10</span>
-        <div className='flex'>
+      <div className='flex items-center justify-center gap-2'>
+        <span className='text-[10px] tabular-nums text-muted-foreground'>
+          -10
+        </span>
+        <div className='flex overflow-hidden rounded-full'>
           {Array.from({ length: 21 }, (_, i) => {
             const score = i - 10;
             return (
               <div
                 key={i}
-                className='w-3 h-3'
+                className='h-2 w-3'
                 style={{ backgroundColor: scoreToColor(score) }}
               />
             );
           })}
         </div>
-        <span className='text-[10px] font-mono text-muted-foreground'>+10</span>
+        <span className='text-[10px] tabular-nums text-muted-foreground'>
+          +10
+        </span>
       </div>
     </div>
   );
@@ -633,38 +615,20 @@ const StatsMoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
 
   return (
     <div className='space-y-4'>
-      {/* Mode Toggle */}
-      <div className='flex items-center justify-between'>
-        <h3 className='text-sm font-bold uppercase tracking-wide'>
-          Mood Timeline
+      <div className='flex items-center justify-between gap-3'>
+        <h3 className='font-serif text-base font-medium tracking-tight'>
+          Mood timeline
         </h3>
-        <div className='flex border-2 border-foreground/20'>
-          <button
-            onClick={() => setMode('30days')}
-            className={cn(
-              'px-3 py-1 text-xs font-bold uppercase transition-colors',
-              mode === '30days'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-accent'
-            )}
-          >
-            30 Days
-          </button>
-          <button
-            onClick={() => setMode('alltime')}
-            className={cn(
-              'px-3 py-1 text-xs font-bold uppercase transition-colors border-l-2 border-foreground/20',
-              mode === 'alltime'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-card hover:bg-accent'
-            )}
-          >
-            All Time
-          </button>
-        </div>
+        <Segmented
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: '30days', label: '30 days' },
+            { value: 'alltime', label: 'All time' },
+          ]}
+        />
       </div>
 
-      {/* Chart */}
       {hasData ? (
         <div className='h-[200px] w-full'>
           <ResponsiveContainer width='100%' height='100%'>
@@ -674,16 +638,18 @@ const StatsMoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
             >
               <XAxis
                 dataKey='label'
-                tick={{ fontSize: 10, fontFamily: 'monospace' }}
-                stroke='var(--muted-foreground)'
+                tick={axisTick}
+                stroke='var(--border)'
                 tickLine={false}
+                axisLine={{ stroke: 'var(--border)' }}
                 interval={mode === 'alltime' ? 'preserveStartEnd' : 4}
               />
               <YAxis
                 domain={[-10, 10]}
-                tick={{ fontSize: 10, fontFamily: 'monospace' }}
-                stroke='var(--muted-foreground)'
+                tick={axisTick}
+                stroke='var(--border)'
                 tickLine={false}
+                axisLine={false}
                 ticks={[-10, -5, 0, 5, 10]}
               />
               <ReferenceLine
@@ -691,22 +657,14 @@ const StatsMoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
                 stroke='var(--border)'
                 strokeDasharray='3 3'
               />
-              <Tooltip content={<TimelineTooltip />} />
-              {mode === '30days' && (
-                <Legend
-                  verticalAlign='top'
-                  align='right'
-                  iconType='square'
-                  wrapperStyle={{ fontSize: '10px', fontFamily: 'monospace' }}
-                />
-              )}
+              <Tooltip content={<TimelineTooltip />} cursor={{ stroke: 'var(--border)' }} />
               {mode === '30days' && (
                 <Line
                   name='Previous 30 days'
                   type='monotone'
                   dataKey='previous'
                   stroke='var(--muted-foreground)'
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   strokeDasharray='4 4'
                   dot={<PreviousDot />}
                   connectNulls
@@ -725,25 +683,17 @@ const StatsMoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className='h-[200px] flex items-center justify-center text-muted-foreground text-sm'>
+        <div className='flex h-[200px] items-center justify-center text-sm text-muted-foreground'>
           No mood data available
         </div>
       )}
 
-      {/* Legend explanation for 30 days mode */}
-      {mode === '30days' && (
-        <div className='flex items-center gap-4 text-xs text-muted-foreground'>
-          <div className='flex items-center gap-1'>
-            <div className='w-8 h-0.5 bg-primary' />
-            <span>Current period</span>
-          </div>
-          <div className='flex items-center gap-1'>
-            <div
-              className='w-8 h-0.5 bg-muted-foreground'
-              style={{ borderTop: '2px dashed var(--muted-foreground)' }}
-            />
-            <span>Previous period</span>
-          </div>
+      {mode === '30days' ? (
+        <PeriodLegend periodLabel='30 days' />
+      ) : (
+        <div className='flex items-center gap-1.5 text-xs text-muted-foreground'>
+          <span className='inline-block h-0.5 w-6 rounded-full bg-primary' />
+          <span>Weekly average</span>
         </div>
       )}
     </div>
@@ -752,34 +702,41 @@ const StatsMoodTimeline = ({ entries }: { entries: AnalysisData[] }) => {
 
 export { StatsMoodTimeline };
 
+const CollapseButton = ({ isOpen }: { isOpen: boolean }) => (
+  <CollapsibleTrigger asChild>
+    <Button variant='ghost' size='icon-sm' className='text-muted-foreground'>
+      <ChevronDown
+        className={cn(
+          'size-4 transition-transform duration-200',
+          isOpen && 'rotate-180'
+        )}
+      />
+      <span className='sr-only'>{isOpen ? 'Collapse' : 'Expand'}</span>
+    </Button>
+  </CollapsibleTrigger>
+);
+
 // Main MoodInsights Component (used on journal page - timeline only)
 export default function MoodInsights({ entries }: MoodInsightsProps) {
   const [isOpen, setIsOpen] = React.useState(true);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <RetroWindow
-        title='Mood Insights'
-        actions={
-          <CollapsibleTrigger asChild>
-            <button className='px-2 py-0.5 text-xs font-bold uppercase bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors'>
-              {isOpen ? '▲ Collapse' : '▼ Expand'}
-            </button>
-          </CollapsibleTrigger>
-        }
+      <Panel
+        eyebrow='Insights'
+        title='How you’ve been feeling'
+        actions={<CollapseButton isOpen={isOpen} />}
       >
         <CollapsibleContent>
-          {/* Mood Timeline only */}
           <MoodTimeline entries={entries} />
         </CollapsibleContent>
 
-        {/* Collapsed state summary */}
         {!isOpen && (
-          <div className='text-sm text-muted-foreground text-center py-2'>
-            Click expand to view mood timeline
-          </div>
+          <p className='text-sm text-muted-foreground'>
+            Expand to see your mood timeline.
+          </p>
         )}
-      </RetroWindow>
+      </Panel>
     </Collapsible>
   );
 }
@@ -790,42 +747,27 @@ export function FullMoodInsights({ entries }: MoodInsightsProps) {
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <RetroWindow
-        title='Mood Statistics'
-        actions={
-          <CollapsibleTrigger asChild>
-            <button className='px-2 py-0.5 text-xs font-bold uppercase bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors'>
-              {isOpen ? '▲ Collapse' : '▼ Expand'}
-            </button>
-          </CollapsibleTrigger>
-        }
+      <Panel
+        eyebrow='Insights'
+        title='Mood statistics'
+        actions={<CollapseButton isOpen={isOpen} />}
       >
         <CollapsibleContent>
           <div className='space-y-8'>
-            {/* Mood Distribution bar chart */}
             <MoodDistributionChart entries={entries} />
-
-            {/* Divider */}
-            <div className='border-t-2 border-foreground/10' />
-
-            {/* Mood Timeline with All Time / 30 Days */}
+            <div className='border-t border-border/50' />
             <StatsMoodTimeline entries={entries} />
-
-            {/* Divider */}
-            <div className='border-t-2 border-foreground/10' />
-
-            {/* Mood Heatmap (All Time) */}
+            <div className='border-t border-border/50' />
             <MoodHeatmap entries={entries} />
           </div>
         </CollapsibleContent>
 
-        {/* Collapsed state summary */}
         {!isOpen && (
-          <div className='text-sm text-muted-foreground text-center py-2'>
-            Click expand to view mood statistics and heatmap
-          </div>
+          <p className='text-sm text-muted-foreground'>
+            Expand to see distribution, timeline, and a year of moods.
+          </p>
         )}
-      </RetroWindow>
+      </Panel>
     </Collapsible>
   );
 }

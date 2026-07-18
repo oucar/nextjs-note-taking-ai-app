@@ -1,35 +1,38 @@
-import { RetroWindow } from '@/components/retro';
-
 const HomeLoading = () => {
   return (
-    <div className='space-y-6'>
+    <div className='space-y-8'>
       {/* Page Header Skeleton */}
-      <div className='space-y-1'>
-        <div className='h-8 w-32 bg-foreground/10 animate-pulse' />
-        <div className='h-4 w-48 bg-foreground/5 animate-pulse' />
+      <div className='flex flex-wrap items-end justify-between gap-4'>
+        <div className='space-y-2'>
+          <div className='h-3 w-24 animate-pulse rounded-full bg-foreground/5' />
+          <div className='h-9 w-40 animate-pulse rounded-lg bg-foreground/10' />
+        </div>
+        <div className='flex gap-2.5'>
+          <div className='h-9 w-40 animate-pulse rounded-full bg-foreground/5' />
+          <div className='h-9 w-28 animate-pulse rounded-full bg-foreground/10' />
+        </div>
       </div>
 
-      {/* Action Bar Skeleton */}
-      <RetroWindow title='Actions'>
-        <div className='flex flex-col sm:flex-row gap-4 sm:items-end sm:justify-between'>
-          <div className='flex-1 max-w-xl h-10 bg-foreground/5 animate-pulse' />
-          <div className='h-10 w-32 bg-foreground/10 animate-pulse' />
-        </div>
-      </RetroWindow>
+      {/* Insights Skeleton */}
+      <div className='rounded-2xl border border-border/70 bg-card p-6 shadow-card'>
+        <div className='h-4 w-44 animate-pulse rounded-full bg-foreground/10' />
+        <div className='mt-5 h-[200px] animate-pulse rounded-xl bg-foreground/5' />
+      </div>
 
       {/* Entries Skeleton */}
-      <RetroWindow title='Loading...'>
-        <div className='space-y-3'>
+      <div className='space-y-2.5'>
+        <div className='h-4 w-56 animate-pulse rounded-full bg-foreground/5' />
+        <div className='divide-y divide-border/50 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card'>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className='flex items-center gap-4 py-3'>
-              <div className='w-20 h-4 bg-foreground/5 animate-pulse' />
-              <div className='flex-1 h-4 bg-foreground/5 animate-pulse' />
-              <div className='w-16 h-5 bg-foreground/5 animate-pulse' />
-              <div className='w-8 h-4 bg-foreground/5 animate-pulse' />
+            <div key={i} className='flex items-center gap-4 px-5 py-4'>
+              <div className='h-3.5 w-16 animate-pulse rounded-full bg-foreground/5' />
+              <div className='h-3.5 flex-1 animate-pulse rounded-full bg-foreground/5' />
+              <div className='h-5 w-16 animate-pulse rounded-full bg-foreground/5' />
+              <div className='h-3.5 w-8 animate-pulse rounded-full bg-foreground/5' />
             </div>
           ))}
         </div>
-      </RetroWindow>
+      </div>
     </div>
   );
 };

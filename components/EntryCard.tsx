@@ -1,5 +1,6 @@
 import { scoreToColor } from '@/util/color';
-import { RetroBadge } from '@/components/retro';
+import { MoodBadge } from '@/components/journal';
+import { ArrowRight } from 'lucide-react';
 
 type EntryCardProps = {
   entry: {
@@ -20,49 +21,38 @@ const EntryCard = ({ entry }: EntryCardProps) => {
     minute: '2-digit',
     hour12: true,
   });
-  const summary = entry.analysis?.summary ?? 'No analysis yet...';
+  const summary = entry.analysis?.summary ?? 'Not analyzed yet…';
   const mood = entry.analysis?.mood ?? null;
   const score = entry.analysis?.sentimentScore ?? null;
-  const color =
-    score !== null ? scoreToColor(score) : (entry.analysis?.color ?? '#888888');
+  const color = score !== null ? scoreToColor(score) : undefined;
 
   return (
-    <div className='flex items-center gap-4 py-3 px-2 hover:bg-accent/50 transition-colors group'>
-      {/* Time */}
-      <div className='w-20 shrink-0'>
-        <span className='text-xs font-mono text-muted-foreground uppercase'>
-          {time}
-        </span>
-      </div>
+    <div className='group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-accent/50 sm:px-5'>
+      <span className='w-16 shrink-0 text-xs tabular-nums text-muted-foreground'>
+        {time}
+      </span>
 
-      {/* Summary */}
-      <div className='flex-1 min-w-0'>
-        <p className='text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors'>
-          {summary}
-        </p>
-      </div>
+      <p className='min-w-0 flex-1 truncate text-[15px] text-foreground/90'>
+        {summary}
+      </p>
 
-      {/* Mood Badge */}
       {mood && (
-        <RetroBadge variant='mood' className='shrink-0'>
+        <MoodBadge color={color} className='hidden shrink-0 sm:inline-flex'>
           {mood}
-        </RetroBadge>
+        </MoodBadge>
       )}
 
-      {/* Score */}
       {score !== null && (
-        <div className='shrink-0 w-12 text-right'>
-          <span className='text-xs font-bold font-mono' style={{ color }}>
-            {score > 0 ? '+' : ''}
-            {score}
-          </span>
-        </div>
+        <span
+          className='w-9 shrink-0 text-right text-xs font-semibold tabular-nums'
+          style={{ color }}
+        >
+          {score > 0 ? '+' : ''}
+          {score}
+        </span>
       )}
 
-      {/* Arrow indicator */}
-      <div className='shrink-0 text-muted-foreground group-hover:text-foreground transition-colors'>
-        <span className='text-xs'>→</span>
-      </div>
+      <ArrowRight className='size-3.5 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100' />
     </div>
   );
 };
